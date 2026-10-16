@@ -1,4 +1,22 @@
+<<<<<<< HEAD
 """Các tool của AI Agent. Tích hợp module đồng bộ QLĐT, xử lý xung đột và Google Calendar."""
+=======
+"""Các tool của AI Agent. HIỆN TẠI TẤT CẢ ĐỀU LÀ MOCK.
+
+Mỗi hàm có input/output rõ ràng; routes chỉ gọi các hàm này. Khi thành viên
+khác tích hợp tool thật, chỉ cần thay phần thân hàm, giữ nguyên chữ ký và
+dạng dict trả về thì không phải sửa routes.
+
+Mapping API -> tool:
+  API 1 /schedule/sync              -> sync_qldt_schedule, resolve_conflicts_and_reschedule (chỉ đề xuất)
+  API 2 /schedule/confirm-reschedule -> sync_google_calendar (chỉ sau khi đã xác nhận)
+  API 3 /roadmap/generate           -> extract_document_content, generate_study_roadmap
+  API 4 /workspace/enter/{task_id}  -> extract_document_content
+  API 5 /tutor/chat                 -> query_llm_tutor
+  API 6 /tutor/inactivity-check     -> inactivity_check_trigger
+  (Nếu tên tool trong contract của nhóm khác, hãy đổi tên hàm ở đây và ghi lại mapping.)
+"""
+>>>>>>> 7c64ba8e504c34dcf9c1f53235de2acfcf51964c
 import math
 import time
 from datetime import date, timedelta
@@ -6,13 +24,17 @@ from datetime import date, timedelta
 from app import config
 from app.services import json_storage, planner
 from app.services.confirmation import require_user_confirmation
+<<<<<<< HEAD
 from app.services.sync_qldt_schedule import sync_qldt_schedule as real_sync_qldt
 from app.services.conflict_resolver import resolve_conflicts_and_reschedule as real_resolve_conflicts
 from app.services.gcal_sync import sync_google_calendar as real_sync_gcal
+=======
+>>>>>>> 7c64ba8e504c34dcf9c1f53235de2acfcf51964c
 
 
 # ---------------------------------------------------------------- QLĐT
 def sync_qldt_schedule(force_refresh: bool = False) -> dict:
+<<<<<<< HEAD
     """Đồng bộ thời khóa biểu từ QLĐT sử dụng module sync thực tế (hỗ trợ Live API và Fallback)."""
     result = real_sync_qldt()
     
@@ -24,18 +46,69 @@ def sync_qldt_schedule(force_refresh: bool = False) -> dict:
         "status": result.get("status"),
         "warning": result.get("warning"),
         "changes": result.get("changes")
+=======
+    """MOCK: chưa kết nối QLĐT thật; `force_refresh` chưa được dùng.
+
+    Đọc qldt_fallback_response.json; nếu không có thì dùng lessons.json.
+    Chỉ ĐỌC, không ghi file nào.
+    """
+    if json_storage.exists(config.FALLBACK_FILE):
+        data = json_storage.read_json(config.FALLBACK_FILE)
+        return {
+            "source": "qldt_fallback_file",
+            "last_updated": data.get("last_updated"),
+            "lessons": data["lessons"],
+            "is_mock": True,
+        }
+    return {
+        "source": "lessons_json_sample",
+        "last_updated": None,
+        "lessons": json_storage.read_json(config.LESSONS_FILE),
+        "is_mock": True,
+>>>>>>> 7c64ba8e504c34dcf9c1f53235de2acfcf51964c
     }
 
 
 def resolve_conflicts_and_reschedule(conflicts: list, lessons: list, sessions: list) -> dict:
+<<<<<<< HEAD
     """Ủy quyền thuật toán xử lý xung đột và tìm slot trống cho module conflict_resolver."""
     return real_resolve_conflicts(conflicts, lessons, sessions)
+=======
+    """MOCK, CHỈ ĐỀ XUẤT: gắn `suggested_slot` cho từng xung đột. KHÔNG sửa lịch nào."""
+    proposals = []
+    for c in conflicts:
+        slot = None
+        if c["is_flexible"]:
+            duration = planner.to_minutes(c["task_end"]) - planner.to_minutes(c["task_start"])
+            slot = planner.suggest_slot(duration, c["date"], planner.to_minutes(c["task_start"]),
+                                        lessons, sessions, ignore_task_id=c["task_id"])
+        proposals.append({**c, "suggested_slot": slot})
+    return {"applied": False, "mode": "mock", "conflicts": proposals}
+>>>>>>> 7c64ba8e504c34dcf9c1f53235de2acfcf51964c
 
 
 # ------------------------------------------------------ Google Calendar
 def sync_google_calendar(tasks: list, user_confirmed) -> dict:
+<<<<<<< HEAD
     """Ủy quyền đồng bộ Google Calendar cho module gcal_sync."""
     return real_sync_gcal(tasks, user_confirmed)
+=======
+    """MOCK: chưa gọi Google Calendar thật nên luôn trả synced=False.
+
+    Tự từ chối nếu chưa có xác nhận (không thể gọi tool này khi chưa xác nhận).
+    Task đã có gcal_event_id -> "would_update" (cập nhật, không tạo trùng).
+    """
+    require_user_confirmation(user_confirmed)
+    results = []
+    for t in tasks:
+        event_id = t.get("gcal_event_id")
+        results.append({
+            "task_id": t["task_id"],
+            "action": "would_update" if event_id else "would_create",
+            "gcal_event_id": event_id,
+        })
+    return {"synced": False, "mode": "mock", "results": results}
+>>>>>>> 7c64ba8e504c34dcf9c1f53235de2acfcf51964c
 
 
 # ---------------------------------------------------------------- Tài liệu
@@ -112,11 +185,20 @@ def query_llm_tutor(task: dict, user_message: str, code_snippet, chat_history: l
     ]
     if code_snippet:
         lines += ["", f"Bạn có gửi kèm đoạn code ({len(code_snippet.splitlines())} dòng); "
+<<<<<<< HEAD
                      "bản mock chưa phân tích đoạn code này."]
+=======
+                      "bản mock chưa phân tích đoạn code này."]
+>>>>>>> 7c64ba8e504c34dcf9c1f53235de2acfcf51964c
     return {"status": "success", "provider_used": "mock", "reply_markdown": "\n".join(lines)}
 
 
 # ------------------------------------------------------- Nhắc học (inactivity)
+<<<<<<< HEAD
+=======
+# Mock state trong bộ nhớ, tách theo từng task_id. Giới hạn: mất khi khởi động lại
+# server và không dùng chung giữa nhiều worker. Chưa có session bền vững.
+>>>>>>> 7c64ba8e504c34dcf9c1f53235de2acfcf51964c
 _last_reminder: dict = {}
 
 
@@ -135,7 +217,11 @@ def inactivity_check_trigger(task: dict, current_subtask, inactive_minutes: int,
     last = _last_reminder.get(task["task_id"])
     if last is not None and now - last < cooldown:
         return {"should_remind": False, "skip_reason": "rate_limited", "message": None,
+<<<<<<< HEAD
                 "retry_after_sessions": None, "retry_after_seconds": max(1, math.ceil(cooldown - (now - last)))}
+=======
+                "retry_after_seconds": max(1, math.ceil(cooldown - (now - last)))}
+>>>>>>> 7c64ba8e504c34dcf9c1f53235de2acfcf51964c
 
     _last_reminder[task["task_id"]] = now
     target = f'bước "{current_subtask}"' if current_subtask else f'buổi học "{task["title"]}"'
@@ -145,4 +231,8 @@ def inactivity_check_trigger(task: dict, current_subtask, inactive_minutes: int,
         "message": f"Bạn đã dừng khoảng {inactive_minutes} phút rồi. Mình quay lại {target} nhé? "
                    "Chỉ cần làm một phần nhỏ trong 5 phút thôi.",
         "retry_after_seconds": None,
+<<<<<<< HEAD
     }
+=======
+    }
+>>>>>>> 7c64ba8e504c34dcf9c1f53235de2acfcf51964c
