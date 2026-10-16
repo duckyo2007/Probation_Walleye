@@ -1,0 +1,180 @@
+{
+  "study_sessions": [
+    {
+      "task_id": "TASK_2026-10-14_01",
+      "course_code": "CS201",
+      "course_name": "Cấu trúc dữ liệu và giải thuật",
+      "title": "Ôn tập mảng và danh sách liên kết",
+      "date": "2026-10-14",
+      "start": "19:00",
+      "end": "20:00",
+      "status": "completed",
+      "is_flexible": true,
+      "slide_url": "https://example.com/slides/cs201-w6.pdf",
+      "pomodoro_completed": 2,
+      "pomodoro_target": 2,
+      "personal_notes": "Nhớ phân biệt chèn đầu và chèn cuối.",
+      "subtasks": [
+        {
+          "sub_id": "SUB_001",
+          "content": "Đọc lại slide tuần 6",
+          "done": true
+        },
+        {
+          "sub_id": "SUB_002",
+          "content": "Làm 3 bài tập danh sách liên kết",
+          "done": true
+        }
+      ],
+      "gcal_event_id": null
+    },
+    {
+      "task_id": "TASK_2026-10-15_01",
+      "course_code": "CS201",
+      "course_name": "Cấu trúc dữ liệu và giải thuật",
+      "title": "Ôn tập cây nhị phân tìm kiếm",
+      "date": "2026-10-20",
+      "start": "19:00",
+      "end": "20:30",
+      "status": "pending",
+      "is_flexible": true,
+      "slide_url": "https://example.com/slides/cs201-w7.pdf",
+      "pomodoro_completed": 0,
+      "pomodoro_target": 3,
+      "personal_notes": "",
+      "subtasks": [
+        {
+          "sub_id": "SUB_003",
+          "content": "Đọc lại slide về cây nhị phân tìm kiếm",
+          "done": false
+        },
+        {
+          "sub_id": "SUB_004",
+          "content": "Cài đặt hàm chèn và tìm kiếm",
+          "done": false
+        },
+        {
+          "sub_id": "SUB_005",
+          "content": "Làm 2 bài tập duyệt cây",
+          "done": false
+        }
+      ],
+      "gcal_event_id": null
+    },
+    {
+      "task_id": "TASK_2026-10-15_02",
+      "course_code": "MA101",
+      "course_name": "Giải tích 1",
+      "title": "Luyện bài tập giới hạn và liên tục",
+      "date": "2026-10-15",
+      "start": "21:00",
+      "end": "22:00",
+      "status": "in_progress",
+      "is_flexible": true,
+      "slide_url": "https://example.com/slides/ma101-w7.pdf",
+      "pomodoro_completed": 1,
+      "pomodoro_target": 2,
+      "personal_notes": "Xem lại định nghĩa epsilon-delta.",
+      "subtasks": [
+        {
+          "sub_id": "SUB_006",
+          "content": "Làm bài tập giới hạn dãy số",
+          "done": true
+        },
+        {
+          "sub_id": "SUB_007",
+          "content": "Làm bài tập hàm liên tục",
+          "done": false
+        }
+      ],
+      "gcal_event_id": "SAMPLE_GCAL_EVENT_002"
+    },
+    {
+      "task_id": "TASK_2026-10-16_01",
+      "course_code": "CS230",
+      "course_name": "Cơ sở dữ liệu",
+      "title": "Thiết kế lược đồ ER cho bài tập lớn",
+      "date": "2026-10-16",
+      "start": "19:00",
+      "end": "20:30",
+      "status": "pending",
+      "is_flexible": true,
+      "slide_url": null,
+      "pomodoro_completed": 0,
+      "pomodoro_target": 3,
+      "personal_notes": "",
+      "subtasks": [
+        {
+          "sub_id": "SUB_008",
+          "content": "Liệt kê các thực thể",
+          "done": false
+        },
+        {
+          "sub_id": "SUB_009",
+          "content": "Xác định khóa chính và quan hệ",
+          "done": false
+        },
+        {
+          "sub_id": "SUB_010",
+          "content": "Vẽ sơ đồ ER nháp",
+          "done": false
+        }
+      ],
+      "gcal_event_id": null
+    },
+    {
+      "task_id": "TASK_2026-10-17_01",
+      "course_code": "EN201",
+      "course_name": "Tiếng Anh học thuật",
+      "title": "Luyện viết đoạn văn học thuật",
+      "date": "2026-10-17",
+      "start": "09:00",
+      "end": "10:30",
+      "status": "pending",
+      "is_flexible": false,
+      "slide_url": "https://example.com/slides/en201-w7.pdf",
+      "pomodoro_completed": 0,
+      "pomodoro_target": 3,
+      "personal_notes": "",
+      "subtasks": [
+        {
+          "sub_id": "SUB_011",
+          "content": "Đọc mẫu đoạn văn học thuật",
+          "done": false
+        },
+        {
+          "sub_id": "SUB_012",
+          "content": "Viết đoạn 150 từ",
+          "done": false
+        },
+        {
+          "sub_id": "SUB_013",
+          "content": "Tự rà lỗi ngữ pháp",
+          "done": false
+        }
+      ],
+      "gcal_event_id": null
+    }
+  ],
+  "delay_prediction_mock": {
+    "overall_risk": "medium",
+    "generated_at": "2026-10-15T08:00:00+07:00",
+    "predictions": [
+      {
+        "task_id": "TASK_2026-10-15_01",
+        "risk_level": "high",
+        "reason": "Trùng với buổi học bù và chưa bắt đầu."
+      },
+      {
+        "task_id": "TASK_2026-10-15_02",
+        "risk_level": "medium",
+        "reason": "Đã làm một nửa nhưng khung giờ khá muộn."
+      },
+      {
+        "task_id": "TASK_2026-10-16_01",
+        "risk_level": "low",
+        "reason": "Còn thời gian và chưa có xung đột lịch."
+      }
+    ]
+  }
+}

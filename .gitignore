@@ -1,0 +1,31 @@
+# Bí mật
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials*.json
+token*.json
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+
+# File tạm khi ghi JSON an toàn
+*.tmp
+
+# Node / Vite
+node_modules/
+dist/
+
+# Hệ điều hành / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Local backup
+tasks.backup.json
