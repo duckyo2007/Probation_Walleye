@@ -1,49 +1,92 @@
-"""Điểm vào của backend. Chạy: uvicorn app.main:app --reload --port 8000"""
-from fastapi import FastAPI, Request
+import asyncio
+from contextlib import asynccontextmanager
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 
-from app import config
-from app.api.routes import router
-from app.services.confirmation import CONFIRMATION_MESSAGE, ConfirmationRequired
-from app.services.json_storage import StorageError
-from app.services.planner import PlanError
+from app.api.routes import router as api_router
+from app.config import STATIC_DIR
+from app.services.qldt_client import check_and_run_sunday_auto_sync
+from app.services.seed_data import ensure_initial_seed_data
 
-app = FastAPI(title="EasyPlan Backend Gateway", version="0.1.0")
 
-# Cho phép frontend Vite (localhost:5173) gọi backend khi chạy local.
+async def _sunday_auto_sync_loop() -> None:
+    """
+    Background loop that checks every 30 minutes if today is Sunday and automatically
+    scrapes PTIT QLĐT schedule using the user's saved credentials.
+    """
+    while True:
+        try:
+            await asyncio.to_thread(check_and_run_sunday_auto_sync)
+        except Exception:
+            pass
+        await asyncio.sleep(1800)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    ensure_initial_seed_data(force_reset=False)
+    sync_task = asyncio.create_task(_sunday_auto_sync_loop())
+    try:
+        yield
+    finally:
+        sync_task.cancel()
+
+
+app = FastAPI(
+    title="EasyPlan AI Agent API",
+    description="Proactive AI Learning Assistant & PTIT QLĐT Schedule Sync Platform",
+    version="1.0.0",
+    lifespan=lifespan,
+)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=config.get_cors_origins(),
+    allow_origins=["*"],
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-app.include_router(router, prefix="/api")
+STATIC_DIR.mkdir(parents=True, exist_ok=True)
+app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
+app.include_router(api_router)
 
 
-@app.get("/health")
-def health():
-    return {"status": "ok"}
+@app.exception_handler(HTTPException)
+async def custom_http_exception_handler(request: Request, exc: HTTPException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": str(exc.detail)},
+    )
 
 
-# ---- Đổi lỗi nghiệp vụ thành HTTP response (403, 400/404, 500) ----
-@app.exception_handler(ConfirmationRequired)
-async def handle_confirmation_required(request: Request, exc: ConfirmationRequired):
-    return JSONResponse(status_code=403, content={"detail": CONFIRMATION_MESSAGE})
-
-
-@app.exception_handler(PlanError)
-async def handle_plan_error(request: Request, exc: PlanError):
-    return JSONResponse(status_code=exc.status_code, content={"detail": exc.message})
-
-
-@app.exception_handler(StorageError)
-async def handle_storage_error(request: Request, exc: StorageError):
-    return JSONResponse(status_code=500, content={"detail": str(exc)})
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    errors = exc.errors()
+    if errors:
+        first = errors[0]
+        loc = ".".join(str(x) for x in first.get("loc", []))
+        msg = first.get("msg", "Validation error")
+        detail_msg = f"Validation error at '{loc}': {msg}"
+    else:
+        detail_msg = "Request validation error"
+    return JSONResponse(
+        status_code=422,
+        content={"detail": detail_msg},
+    )
 
 
 @app.exception_handler(Exception)
-async def handle_unexpected_error(request: Request, exc: Exception):
-    # Không trả chi tiết lỗi nội bộ cho client.
-    return JSONResponse(status_code=500, content={"detail": "Lỗi máy chủ nội bộ"})
+async def global_exception_handler(request: Request, exc: Exception):
+    return JSONResponse(
+        status_code=500,
+        content={"detail": f"Internal server error: {str(exc)}"},
+    )
+
+
+@app.get("/health")
+def health_check():
+    return {"status": "ok", "service": "EasyPlan AI Agent Backend"}

@@ -1,38 +1,34 @@
-"""Cấu hình chung của backend. Chỉ đọc biến môi trường, không chứa bí mật."""
 import os
 from pathlib import Path
 
-# Thư mục backend/ (chứa app/, data/, tests/). Tính từ vị trí file này
-# nên chạy uvicorn/pytest ở thư mục nào cũng được.
 BASE_DIR = Path(__file__).resolve().parent.parent
+DATA_DIR = BASE_DIR / "data"
+STATIC_DIR = BASE_DIR / "static"
+SLIDES_DIR = STATIC_DIR / "slides"
 
-# Tên các file dữ liệu (nằm trong thư mục data)
-LESSONS_FILE = "lessons.json"
-TASKS_FILE = "tasks.json"
-FALLBACK_FILE = "qldt_fallback_response.json"
+DATA_DIR.mkdir(parents=True, exist_ok=True)
+SLIDES_DIR.mkdir(parents=True, exist_ok=True)
 
-POMODORO_MINUTES = 25
-INACTIVITY_THRESHOLD_MINUTES = 10  # chỉ nhắc khi không hoạt động từ 10 phút trở lên
+LESSONS_FILE = DATA_DIR / "lessons.json"
+TASKS_FILE = DATA_DIR / "tasks.json"
+SETTINGS_FILE = DATA_DIR / "settings.json"
+TKB_PTIT_FILE = DATA_DIR / "tkb_ptit.json"
+QLDT_FALLBACK_FILE = DATA_DIR / "qldt_fallback_response.json"
 
+# Load .env manually if present so we don't require external dotenv dependency
+ENV_FILE = BASE_DIR / ".env"
+if ENV_FILE.exists():
+    for raw_line in ENV_FILE.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        k, v = line.split("=", 1)
+        k = k.strip()
+        v = v.strip().strip('"').strip("'")
+        if k and k not in os.environ:
+            os.environ[k] = v
 
-def get_data_dir() -> Path:
-    """Thư mục chứa file JSON.
-
-    Mặc định là backend/data. Đặt biến EASYPLAN_DATA_DIR để dùng thư mục khác
-    (pytest dùng cách này để chạy trên bản sao, không đụng dữ liệu mẫu thật).
-    """
-    custom = os.environ.get("EASYPLAN_DATA_DIR")
-    return Path(custom).resolve() if custom else BASE_DIR / "data"
-
-
-def get_cors_origins() -> list[str]:
-    raw = os.environ.get("CORS_ORIGINS", "http://localhost:5173,http://127.0.0.1:5173")
-    return [origin.strip() for origin in raw.split(",") if origin.strip()]
-
-
-def get_inactivity_cooldown_seconds() -> int:
-    """Khoảng cách tối thiểu giữa 2 lần nhắc cho cùng một task."""
-    try:
-        return int(os.environ.get("INACTIVITY_COOLDOWN_SECONDS", "300"))
-    except ValueError:
-        return 300
+# Default Gemini model per Google Gemini 3.8 SDK specification
+GEMINI_MODEL = "gemini-3.8-flash"
+GROQ_MODEL = os.environ.get("GROQ_MODEL", "llama-3.3-70b-versatile")
+DEFAULT_HOC_KY = int(os.environ.get("QLDT_HOC_KY", "20261"))

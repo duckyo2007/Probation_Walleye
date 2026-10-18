@@ -1,31 +1,25 @@
-# Bí mật
-.env
-.env.*
-!.env.example
-*.pem
-*.key
-credentials*.json
-token*.json
-
 # Python
 __pycache__/
-*.pyc
-.pytest_cache/
+*.py[cod]
+*$py.class
 .venv/
 venv/
+.pytest_cache/
+.env
 
-# File tạm khi ghi JSON an toàn
-*.tmp
-
-# Node / Vite
+# Node
 node_modules/
 dist/
+.env.local
 
-# Hệ điều hành / editor
+# OS / IDE
 .DS_Store
 Thumbs.db
-.idea/
 .vscode/
+.idea/
 
-# Local backup
-tasks.backup.json
+# Runtime settings with credentials
+backend/data/settings.json
+*.tsbuildinfo
+*.tmp
+

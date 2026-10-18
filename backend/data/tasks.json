@@ -1,180 +1,141 @@
-{
-  "study_sessions": [
-    {
-      "task_id": "TASK_2026-10-14_01",
-      "course_code": "CS201",
-      "course_name": "Cấu trúc dữ liệu và giải thuật",
-      "title": "Ôn tập mảng và danh sách liên kết",
-      "date": "2026-10-14",
-      "start": "19:00",
-      "end": "20:00",
-      "status": "completed",
-      "is_flexible": true,
-      "slide_url": "https://example.com/slides/cs201-w6.pdf",
-      "pomodoro_completed": 2,
-      "pomodoro_target": 2,
-      "personal_notes": "Nhớ phân biệt chèn đầu và chèn cuối.",
-      "subtasks": [
-        {
-          "sub_id": "SUB_001",
-          "content": "Đọc lại slide tuần 6",
-          "done": true
-        },
-        {
-          "sub_id": "SUB_002",
-          "content": "Làm 3 bài tập danh sách liên kết",
-          "done": true
-        }
-      ],
-      "gcal_event_id": null
-    },
-    {
-      "task_id": "TASK_2026-10-15_01",
-      "course_code": "CS201",
-      "course_name": "Cấu trúc dữ liệu và giải thuật",
-      "title": "Ôn tập cây nhị phân tìm kiếm",
-      "date": "2026-10-20",
-      "start": "19:00",
-      "end": "20:30",
-      "status": "pending",
-      "is_flexible": true,
-      "slide_url": "https://example.com/slides/cs201-w7.pdf",
-      "pomodoro_completed": 0,
-      "pomodoro_target": 3,
-      "personal_notes": "",
-      "subtasks": [
-        {
-          "sub_id": "SUB_003",
-          "content": "Đọc lại slide về cây nhị phân tìm kiếm",
-          "done": false
-        },
-        {
-          "sub_id": "SUB_004",
-          "content": "Cài đặt hàm chèn và tìm kiếm",
-          "done": false
-        },
-        {
-          "sub_id": "SUB_005",
-          "content": "Làm 2 bài tập duyệt cây",
-          "done": false
-        }
-      ],
-      "gcal_event_id": null
-    },
-    {
-      "task_id": "TASK_2026-10-15_02",
-      "course_code": "MA101",
-      "course_name": "Giải tích 1",
-      "title": "Luyện bài tập giới hạn và liên tục",
-      "date": "2026-10-15",
-      "start": "21:00",
-      "end": "22:00",
-      "status": "in_progress",
-      "is_flexible": true,
-      "slide_url": "https://example.com/slides/ma101-w7.pdf",
-      "pomodoro_completed": 1,
-      "pomodoro_target": 2,
-      "personal_notes": "Xem lại định nghĩa epsilon-delta.",
-      "subtasks": [
-        {
-          "sub_id": "SUB_006",
-          "content": "Làm bài tập giới hạn dãy số",
-          "done": true
-        },
-        {
-          "sub_id": "SUB_007",
-          "content": "Làm bài tập hàm liên tục",
-          "done": false
-        }
-      ],
-      "gcal_event_id": "SAMPLE_GCAL_EVENT_002"
-    },
-    {
-      "task_id": "TASK_2026-10-16_01",
-      "course_code": "CS230",
-      "course_name": "Cơ sở dữ liệu",
-      "title": "Thiết kế lược đồ ER cho bài tập lớn",
-      "date": "2026-10-16",
-      "start": "19:00",
-      "end": "20:30",
-      "status": "pending",
-      "is_flexible": true,
-      "slide_url": null,
-      "pomodoro_completed": 0,
-      "pomodoro_target": 3,
-      "personal_notes": "",
-      "subtasks": [
-        {
-          "sub_id": "SUB_008",
-          "content": "Liệt kê các thực thể",
-          "done": false
-        },
-        {
-          "sub_id": "SUB_009",
-          "content": "Xác định khóa chính và quan hệ",
-          "done": false
-        },
-        {
-          "sub_id": "SUB_010",
-          "content": "Vẽ sơ đồ ER nháp",
-          "done": false
-        }
-      ],
-      "gcal_event_id": null
-    },
-    {
-      "task_id": "TASK_2026-10-17_01",
-      "course_code": "EN201",
-      "course_name": "Tiếng Anh học thuật",
-      "title": "Luyện viết đoạn văn học thuật",
-      "date": "2026-10-17",
-      "start": "09:00",
-      "end": "10:30",
-      "status": "pending",
-      "is_flexible": false,
-      "slide_url": "https://example.com/slides/en201-w7.pdf",
-      "pomodoro_completed": 0,
-      "pomodoro_target": 3,
-      "personal_notes": "",
-      "subtasks": [
-        {
-          "sub_id": "SUB_011",
-          "content": "Đọc mẫu đoạn văn học thuật",
-          "done": false
-        },
-        {
-          "sub_id": "SUB_012",
-          "content": "Viết đoạn 150 từ",
-          "done": false
-        },
-        {
-          "sub_id": "SUB_013",
-          "content": "Tự rà lỗi ngữ pháp",
-          "done": false
-        }
-      ],
-      "gcal_event_id": null
-    }
-  ],
-  "delay_prediction_mock": {
-    "overall_risk": "medium",
-    "generated_at": "2026-10-15T08:00:00+07:00",
-    "predictions": [
+[
+  {
+    "task_id": "task_001",
+    "week": 10,
+    "date": "2026-10-15",
+    "start": "16:00",
+    "end": "17:30",
+    "course_code": "INT1306",
+    "course_name": "Cấu trúc dữ liệu và giải thuật",
+    "title": "Tự học: Cây nhị phân & Duyệt cây",
+    "status": "todo",
+    "is_flexible": true,
+    "pomodoro_target": 2,
+    "pomodoro_Completed": 3,
+    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf",
+    "slide_urls": [
+      "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf",
+      "/static/slides/INT1306_BaiTap_ThucHanh_CayNhiPhan.pdf"
+    ],
+    "subtasks": [
       {
-        "task_id": "TASK_2026-10-15_01",
-        "risk_level": "high",
-        "reason": "Trùng với buổi học bù và chưa bắt đầu."
+        "sub_id": "sub_1",
+        "content": "Đọc định nghĩa Cây nhị phân tìm kiếm (BST)",
+        "done": true
       },
       {
-        "task_id": "TASK_2026-10-15_02",
-        "risk_level": "medium",
-        "reason": "Đã làm một nửa nhưng khung giờ khá muộn."
+        "sub_id": "sub_2",
+        "content": "Code thử thuật toán duyệt cây (Pre-order, In-order)",
+        "done": false
       },
       {
-        "task_id": "TASK_2026-10-16_01",
-        "risk_level": "low",
-        "reason": "Còn thời gian và chưa có xung đột lịch."
+        "sub_id": "sub_3",
+        "content": "Làm 3 câu hỏi trắc nghiệm cuối bài",
+        "done": false
       }
-    ]
+    ],
+    "personal_notes": "",
+    "gcal_event_id": "gcal_task_task_001_20261015_1600"
+  },
+  {
+    "task_id": "task_002",
+    "week": 10,
+    "date": "2026-10-18",
+    "start": "19:30",
+    "end": "21:00",
+    "course_code": "INT1359",
+    "course_name": "Toán rời rạc 2",
+    "title": "Tự học: Duyệt đồ thị DFS/BFS & Chu trình Euler",
+    "status": "todo",
+    "is_flexible": true,
+    "pomodoro_target": 2,
+    "pomodoro_Completed": 0,
+    "slide_url": "/static/slides/INT1359_ToanRoiRac2.pdf",
+    "slide_urls": [
+      "/static/slides/INT1359_ToanRoiRac2.pdf"
+    ],
+    "subtasks": [
+      {
+        "sub_id": "sub_1",
+        "content": "So sánh ma trận kề và danh sách kề trên đồ thị thưa",
+        "done": false
+      },
+      {
+        "sub_id": "sub_2",
+        "content": "Cài đặt thuật toán DFS đệ quy và BFS dùng hàng đợi Queue",
+        "done": false
+      },
+      {
+        "sub_id": "sub_3",
+        "content": "Chứng minh điều kiện bậc chẵn của chu trình Euler",
+        "done": false
+      }
+    ],
+    "personal_notes": "",
+    "gcal_event_id": "gcal_task_002"
+  },
+  {
+    "task_id": "task_003",
+    "week": 10,
+    "date": "2026-10-17",
+    "start": "19:30",
+    "end": "21:00",
+    "course_code": "ELE1309",
+    "course_name": "Điện tử số",
+    "title": "Tự học: Tối thiểu hóa hàm Boole bằng Bìa Karnaugh",
+    "status": "todo",
+    "is_flexible": true,
+    "pomodoro_target": 2,
+    "pomodoro_Completed": 0,
+    "slide_url": "/static/slides/ELE1309_DienTuSo.pdf",
+    "slide_urls": [
+      "/static/slides/ELE1309_DienTuSo.pdf"
+    ],
+    "subtasks": [
+      {
+        "sub_id": "sub_1",
+        "content": "Ôn tập định lý De Morgan và các cổng NAND/NOR",
+        "done": false
+      },
+      {
+        "sub_id": "sub_2",
+        "content": "Rút gọn 3 bài tập hàm Boole 4 biến bằng Bìa Karnaugh",
+        "done": false
+      }
+    ],
+    "personal_notes": "",
+    "gcal_event_id": "gcal_task_003"
+  },
+  {
+    "task_id": "task_004",
+    "week": 10,
+    "date": "2026-10-13",
+    "start": "19:30",
+    "end": "20:30",
+    "course_code": "BAS1269",
+    "course_name": "Xác suất thống kê",
+    "title": "Ôn tập: Công thức xác suất đầy đủ và Công thức Bayes",
+    "status": "done",
+    "is_flexible": true,
+    "pomodoro_target": 2,
+    "pomodoro_Completed": 2,
+    "slide_url": "/static/slides/BAS1269_XacSuatThongKe.pdf",
+    "slide_urls": [
+      "/static/slides/BAS1269_XacSuatThongKe.pdf"
+    ],
+    "subtasks": [
+      {
+        "sub_id": "sub_1",
+        "content": "Nắm vững hệ đầy đủ các biến cố H1, H2, ..., Hn",
+        "done": true
+      },
+      {
+        "sub_id": "sub_2",
+        "content": "Giải 4 bài tập áp dụng công thức Bayes trong slide",
+        "done": true
+      }
+    ],
+    "personal_notes": "Đã làm chắc dạng bài công thức Bayes.",
+    "gcal_event_id": "gcal_task_004"
   }
-}
+]
