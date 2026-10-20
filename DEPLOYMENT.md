@@ -24,7 +24,20 @@ Tài liệu này hướng dẫn chi tiết cách triển khai hệ thống **Eas
 
 ---
 
-## 2. Phương án 1: Deploy bằng Docker & Docker Compose (Khuyên dùng cho VPS / Máy chủ riêng)
+## 2. Phương án 0: Chạy Tự động trên Máy Local / Máy Demo bằng Script 1-Click
+
+Nếu bạn triển khai nhanh trên máy tính thuyết trình (Demo Day) chạy **Windows**, **macOS** hoặc **Linux**:
+
+1. **Tự động tải / cập nhật code mới nhất từ GitHub**:
+   - **Windows**: Chạy `sync_github.bat`
+   - **Linux / macOS**: Chạy `./sync_github.sh`
+2. **Tự động bật cả Backend (`Port 8000`) + Frontend (`Port 5173`) & mở trình duyệt**:
+   - **Windows**: Chạy `start_app.bat`
+   - **Linux / macOS**: Chạy `./start_app.sh`
+
+---
+
+## 3. Phương án 1: Deploy bằng Docker & Docker Compose (Khuyên dùng cho VPS / Máy chủ riêng)
 
 Dự án đã được cấu hình sẵn [`docker-compose.yml`](./docker-compose.yml), [`backend/Dockerfile`](./backend/Dockerfile) và [`frontend/Dockerfile`](./frontend/Dockerfile).
 

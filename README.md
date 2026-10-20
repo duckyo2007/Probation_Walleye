@@ -202,6 +202,10 @@ probation/
 │   ├── Dockerfile                    # Dockerfile cho Frontend
 │   ├── package.json
 │   └── vite.config.ts                # Cấu hình Vite Proxy (/api & /static -> port 8000)
+├── start_app.bat                     # [Windows] 1-Click tự động cài đặt & chạy cả Backend + Frontend
+├── start_app.sh                      # [Linux/macOS] 1-Click tự động cài đặt & chạy cả Backend + Frontend
+├── sync_github.bat                   # [Windows] Tự động git clone / git pull code mới nhất từ GitHub
+├── sync_github.sh                    # [Linux/macOS] Tự động git clone / git pull code mới nhất từ GitHub
 ├── docker-compose.yml                # Chạy toàn bộ hệ thống với 1 lệnh Docker Compose
 ├── DEPLOYMENT.md                     # Hướng dẫn Deploy chi tiết (Render, Vercel, Docker, VPS)
 └── README.md                         # Tài liệu tổng quan dự án
@@ -214,6 +218,32 @@ probation/
 ### Yêu cầu hệ thống
 - **Python**: `>= 3.10`
 - **Node.js**: `>= 18.x`
+- **Git**: Đã cài đặt trên máy
+
+### ⚡ Cách 1: Tự động Tải Code, Cài đặt & Khởi chạy bằng 1 Click (Khuyên dùng)
+
+Dự án cung cấp sẵn bộ script tự động hóa cho cả **Windows (`.bat`)** và **Linux / macOS (`.sh`)**:
+
+#### A. Tự động tải mới (`git clone`) hoặc kéo bản cập nhật mới nhất (`git pull`) từ GitHub:
+- **Trên Windows**: Nhấp đúp chuột chạy file **`sync_github.bat`** (hoặc chạy `.\sync_github.bat` trong Terminal).
+- **Trên Linux / macOS**:
+  ```bash
+  chmod +x sync_github.sh start_app.sh
+  ./sync_github.sh
+  ```
+*(Script sẽ tự động kiểm tra: nếu máy chưa có code sẽ tự `git clone`, nếu đã có code sẽ tự `git pull origin main`, đồng thời tự động cập nhật thư viện `pip` và `npm`).*
+
+#### B. Tự động khởi chạy đồng thời cả Backend (`Port 8000`) & Frontend (`Port 5173`):
+- **Trên Windows**: Nhấp đúp chuột chạy file **`start_app.bat`** (tự động tạo `.venv`, cài `node_modules` nếu thiếu, bật 2 cửa sổ server và mở thẳng trình duyệt tại `http://localhost:5173`).
+- **Trên Linux / macOS**:
+  ```bash
+  ./start_app.sh
+  ```
+  *(Nhấn `Ctrl + C` để dừng đồng thời cả Backend và Frontend).*
+
+---
+
+### 🛠️ Cách 2: Chạy Thủ công Từng Cửa sổ Terminal
 
 ### Bước 1: Cài đặt & Khởi chạy Backend (Cổng `8000`)
 ```bash
