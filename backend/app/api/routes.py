@@ -1,4 +1,5 @@
 import re
+from datetime import date
 from typing import Any, Dict, List, Optional
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 
@@ -10,6 +11,7 @@ from app.schemas.requests import (
     InactivityCheckRequest,
     RemoveTaskDocumentRequest,
     RoadmapConfirmSaveRequest,
+    RoadmapDeleteRequest,
     RoadmapGenerateRequest,
     ScheduleSyncRequest,
     SettingsUpdateRequest,
@@ -26,6 +28,7 @@ from app.services.agent_tools import (
     reset_inactivity_cooldowns,
 )
 from app.services.confirmation import verify_confirmation_gate
+from app.services.internet_time import fetch_internet_date
 from app.services.json_storage import (
     load_lessons,
     load_settings,
@@ -35,9 +38,12 @@ from app.services.json_storage import (
     save_tasks,
 )
 from app.services.planner import (
+    annotate_overdue,
     apply_reschedule,
     complete_workspace_session,
     compute_delay_prediction,
+    delete_roadmaps,
+    get_all_roadmaps,
     resolve_conflicts_and_reschedule,
     save_confirmed_roadmap_sessions,
 )
@@ -50,6 +56,24 @@ from app.services.seed_data import ensure_initial_seed_data
 router = APIRouter(prefix="/api")
 
 
+@router.get("/schedule/today")
+def get_today_endpoint() -> Dict[str, Any]:
+    """
+    Calls public internet time API to fetch the live date in Vietnam (UTC+7)
+    and computes the corresponding semester week.
+    """
+    live_today, time_source = fetch_internet_date()
+    today_iso = live_today.isoformat()
+    week_offset = (live_today - date(2026, 8, 10)).days // 7 + 1
+    current_week = max(1, min(31, week_offset))
+    return {
+        "status": "ok",
+        "today": today_iso,
+        "source": time_source,
+        "current_week": current_week,
+    }
+
+
 @router.post("/schedule/sync")
 def sync_schedule_endpoint(
     request: ScheduleSyncRequest = ScheduleSyncRequest(),
@@ -58,7 +82,7 @@ def sync_schedule_endpoint(
     API 1: `POST /api/schedule/sync`
     Scrapes PTIT QLĐT schedule (or falls back to cached `tkb_ptit.json`),
     runs read-only conflict detection against `tasks.json`, and returns
-    the unified dashboard state.
+    the unified dashboard state with live internet date.
     """
     ensure_initial_seed_data(force_reset=False)
     lessons, source, last_updated = fetch_qldt_schedule(
@@ -69,12 +93,20 @@ def sync_schedule_endpoint(
     )
     tasks = load_tasks()
     conflicts = resolve_conflicts_and_reschedule(lessons, tasks)
-    delay_prediction = compute_delay_prediction(tasks)
+    live_today, time_source = fetch_internet_date()
+    today_iso = live_today.isoformat()
+    delay_prediction = compute_delay_prediction(tasks, lessons, today_iso)
+    tasks = annotate_overdue(tasks, today_iso)
+    week_offset = (live_today - date(2026, 8, 10)).days // 7 + 1
+    current_week = max(1, min(31, week_offset))
 
     return {
         "status": "success",
         "source": source,
         "last_updated": last_updated,
+        "today": today_iso,
+        "today_source": time_source,
+        "current_week": current_week,
         "lessons": lessons,
         "tasks": tasks,
         "delay_prediction": delay_prediction,
@@ -122,6 +154,7 @@ def generate_roadmap_endpoint(
         daily_free_hours=request.daily_free_hours,
         slide_url=request.slide_url,
         slide_urls=request.slide_urls,
+        base_date=request.base_date,
     )
 
 
@@ -148,6 +181,34 @@ def confirm_save_roadmap_endpoint(
         "message": f"Đã thêm {len(added_ids)} phiên tự học vào lịch cá nhân.",
         "added_task_ids": added_ids,
     }
+
+
+@router.get("/roadmap/list")
+def list_roadmaps_endpoint() -> Dict[str, Any]:
+    """
+    Returns list of all active self-study roadmaps with summary statistics.
+    """
+    ensure_initial_seed_data(force_reset=False)
+    roadmaps = get_all_roadmaps()
+    return {
+        "status": "ok",
+        "roadmaps": roadmaps,
+        "total_roadmaps": len(roadmaps),
+    }
+
+
+@router.post("/roadmap/delete")
+def delete_roadmaps_endpoint(request: RoadmapDeleteRequest) -> Dict[str, Any]:
+    """
+    Deletes one or multiple roadmaps and their associated self-study sessions.
+    """
+    result = delete_roadmaps(
+        roadmap_ids=request.roadmap_ids,
+        task_ids=request.task_ids,
+        course_code=request.course_code,
+    )
+    return result
+
 
 
 @router.get("/workspace/enter/{task_id}")
@@ -449,6 +510,10 @@ def simulate_conflict_endpoint() -> Dict[str, Any]:
         save_lessons(lessons)
 
     tasks = load_tasks()
+    tasks = [
+        t for t in tasks
+        if not ("học bù tăng cường" in (t.get("title") or "").lower())
+    ]
     found_task_001 = False
     for t in tasks:
         if t.get("task_id") == "task_001":
@@ -462,18 +527,22 @@ def simulate_conflict_endpoint() -> Dict[str, Any]:
             break
 
     if not found_task_001:
-        ensure_initial_seed_data(force_reset=True)
+        ensure_initial_seed_data(force_reset=True, demo_tasks=True)
         tasks = load_tasks()
     else:
         save_tasks(tasks)
 
     conflicts = resolve_conflicts_and_reschedule(lessons, tasks)
+    today_iso = fetch_internet_date()[0].isoformat()
+    delay_prediction = compute_delay_prediction(tasks, lessons, today_iso)
+    tasks = annotate_overdue(tasks, today_iso)
     return {
         "status": "success",
         "message": "Đã khôi phục tình huống xung đột lịch học mẫu tại Tuần 10 (Thứ 5, 15/10/2026).",
         "conflicts": conflicts,
         "lessons": lessons,
         "tasks": tasks,
+        "delay_prediction": delay_prediction,
     }
 
 

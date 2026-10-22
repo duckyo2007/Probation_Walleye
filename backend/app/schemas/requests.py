@@ -30,6 +30,7 @@ class RoadmapGenerateRequest(BaseModel):
     daily_free_hours: float = Field(default=2.0, gt=0, le=16)
     slide_url: str = Field(default="/static/slides/INT1306_Chuong3_CayNhiPhan.pdf")
     slide_urls: Optional[List[str]] = None
+    base_date: Optional[str] = None
 
 
 class SubtaskItem(BaseModel):
@@ -112,3 +113,10 @@ class AddExtraStudySessionRequest(BaseModel):
 class RemoveTaskDocumentRequest(BaseModel):
     task_id: str = Field(..., min_length=1)
     slide_url: str = Field(..., min_length=1)
+
+
+class RoadmapDeleteRequest(BaseModel):
+    roadmap_ids: List[str] = Field(default_factory=list)
+    task_ids: Optional[List[str]] = None
+    course_code: Optional[str] = None
+

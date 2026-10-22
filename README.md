@@ -89,10 +89,12 @@ flowchart TD
 | **Cào lịch QLĐT PTIT & Gộp tiết** | **REAL** | Đăng nhập API QLĐT PTIT (`pn-signin`), lấy TKB tuần (`w-locdstkbtuanusertheohocky`), gộp tiết liên tiếp và tự động fallback về `tkb_ptit.json` khi lỗi mạng. |
 | **Tự động cào lịch Chủ Nhật** | **REAL** | Background task trong FastAPI lifespan kiểm tra mỗi 30 phút vào ngày Chủ Nhật để tự động đồng bộ lịch mới. |
 | **Phát hiện xung đột & Tìm giờ trống** | **REAL** | Thuật toán Python thuần (`planner.py`), không dùng LLM tính giờ để tránh ảo giác (Hallucination). |
+| **Internet Time API (Thời gian thực)** | **REAL** | Gọi `timeapi.io` (fallback Google HTTP `Date` header) lấy ngày giờ hiện tại Việt Nam (UTC+7), đảm bảo không bao giờ xếp lịch trước ngày hiện tại. |
+| **Quản lý Đa Lộ trình & Xóa Lộ trình** | **REAL** | Lưu trữ theo `roadmap_id`, cho phép xem thống kê tiến độ từng môn học, chọn và xóa từng lộ trình hoặc hàng loạt lộ trình khỏi thời khóa biểu. |
 | **Chốt chặn Confirmation Gate** | **REAL** | Kiểm tra `type(user_confirmed) is bool and user_confirmed is True` ở tầng Python; trả về `HTTP 403 Forbidden` nếu vi phạm. |
 | **Đọc nhiều file PDF (`PyMuPDF`)** | **REAL** | Sử dụng thư viện `fitz` (`PyMuPDF`) đọc văn bản từ tất cả các file PDF đính kèm trong buổi học, hỗ trợ upload nhiều file `.pdf` từ máy tính. |
 | **AI Trợ giảng & Tạo Lộ trình** | **REAL** | Gọi **Google Gemini (`gemini-3.8-flash`)** qua SDK `google-genai` (`client.interactions.create`), tự động fallback sang **Groq API (`llama-3.3-70b-versatile`)**. |
-| **Dự báo Nguy cơ Trễ hạn (Delay Risk)** | **MOCK** | Widget hiển thị cảnh báo rủi ro trễ hạn (`is_mock: true`, `78%`) kèm nút hành động xếp lịch học bù có Confirmation Gate. |
+| **Dự báo Nguy cơ Trễ hạn (Delay Risk)** | **REAL + HEURISTIC** | Tự động phát hiện các buổi tự học bị lỡ (đã qua ngày chưa hoàn thành), gắn nhãn `⏰ Chậm tiến độ` và đề xuất khung giờ học bù tối ưu không trùng lịch trường. |
 | **Đồng bộ Google Calendar (`gcal_event_id`)** | **MOCK / ID** | Sinh và cập nhật mã định danh sự kiện `gcal_event_id` chuẩn hóa trong `lessons.json` và `tasks.json`. |
 
 ---
@@ -100,10 +102,15 @@ flowchart TD
 ## 🖥️ 3. 4 Màn hình Cốt lõi (Theo thiết kế Figma)
 
 1. **Màn hình 01 — Unified Dashboard & Weekly Schedule**:
-   - Header hiển thị trạng thái nguồn lịch (`Live QLĐT API` hoặc `Cache tkb_ptit`), bộ chọn tuần (`Tuần 1` $\rightarrow$ `Tuần 31`), trạng thái `Auto-Sync Chủ Nhật`, nút **Đồng bộ lịch QLĐT**, **Tạo lộ trình AI (Nhiều PDF)**, **Tạo xung đột mẫu**, và **Tài khoản QLĐT & API Key**.
+   - Header hiển thị trạng thái nguồn lịch (`Live QLĐT API` hoặc `Cache tkb_ptit`), nút **Đồng bộ lịch QLĐT**, **🗺️ Quản lý lộ trình**, **✨ Tạo lộ trình AI (Nhiều PDF)**, **⚠️ Tạo xung đột mẫu**, và **⚙️ Tài khoản QLĐT & API Key**.
+   - **Thanh chuyển tuần trực quan ngay trên bảng lịch**: Hỗ trợ chuyển `Tuần trước`, `Tuần sau`, danh sách thả xuống 31 tuần, nút động **`🎯 Về tuần hiện tại (Tuần X)`** và badge hiển thị ngày thời gian thực `🌐 Hôm nay: YYYY-MM-DD`.
    - **Banner 1-Click Enter**: Hiển thị phiên tự học sắp tới với nút `[VÀO TỰ HỌC NGAY →]`.
-   - **Lưới Thời khóa biểu 7 ngày**: Phân biệt trực quan **Lịch cố định trên trường** (Thẻ xanh dương), **Phiên tự học AI** (Thẻ xanh lá), và **Phiên bị xung đột** (Viền đỏ nét đứt).
-   - **Sidebar phải**: Danh sách Việc cần tự học (To-do list nội bộ), Widget Dự báo nguy cơ trễ hạn, và Thanh tiến độ mục tiêu tuần.
+   - **Lưới Thời khóa biểu 7 ngày**: Phân biệt trực quan **Lịch cố định trên trường** (Thẻ xanh dương), **Phiên tự học AI** (Thẻ xanh lá), và **Phiên bị xung đột** (Viền đỏ nét đứt), highlight cột ngày hôm nay thực tế.
+   - **Sidebar phải**:
+     - **Việc cần tự học (To-do list)**: Thu nhỏ tối ưu chỉ hiển thị 2-3 buổi học sắp tới / hôm nay kèm nút `[Xem thêm / Thu gọn]`, banner cảnh báo các buổi `⏰ Chậm tiến độ` (đã qua ngày chưa học xong) và nút mở nhanh `🗺️ Quản lý lộ trình`.
+     - **Widget Dự báo nguy cơ trễ hạn**: Phân tích các buổi bị bỏ lỡ, tính toán tỷ lệ rủi ro và đề xuất nút hành động `[➕ Xếp lịch học bù vào khung giờ trống]` (có Confirmation Gate).
+     - **Thanh tiến độ mục tiêu tuần**: Đếm tỷ lệ hoàn thành các buổi học trong tuần.
+   - **Modal Quản lý Lộ trình Học tập**: Cho phép xem danh sách tất cả các lộ trình môn học đã tạo, thống kê số buổi hoàn thành/sắp tới/chậm tiến độ, chọn từng lộ trình hoặc "Chọn tất cả" và thực hiện xóa an toàn khỏi thời khóa biểu.
 2. **Màn hình 02 — Conflict Resolution Modal (Confirmation Gate)**:
    - Tự động bật lên khi phát hiện lịch học trên trường đè lên lịch tự học cá nhân.
    - Đặt cạnh nhau **Lịch cố định QLĐT** và **Phiên tự học bị trùng**, hiển thị khung giờ trống gợi ý của Agent, cho phép người dùng tự chỉnh lại giờ hoặc bấm `[Đồng ý dời lịch & Đồng bộ Google Calendar]`.
@@ -142,6 +149,10 @@ flowchart TD
 | **7** | `POST /api/workspace/complete` | Hoàn thành phiên học, tính điểm Pomodoro & cập nhật `tasks.json`. | Không |
 
 ### Các Endpoint Bổ trợ Mở rộng
+- `GET /api/schedule/today`: Lấy ngày giờ hiện tại trực tuyến qua Internet Time API (`timeapi.io` / Google Date header) ở múi giờ Việt Nam (UTC+7), tính toán chính xác tuần học hiện tại.
+- `GET /api/roadmap/list`: Thống kê danh sách toàn bộ các lộ trình tự học hiện có theo từng môn, số buổi hoàn thành, sắp tới và trễ hạn.
+- `POST /api/roadmap/delete`: Xóa 1 hoặc nhiều lộ trình học đã chọn và các phiên tự học liên quan khỏi `tasks.json`.
+- `POST /api/schedule/add-extra-session`: Xếp thêm buổi học bù vào khe giờ trống khi có nguy cơ trễ hạn (**Có Confirmation Gate `HTTP 403`**).
 - `POST /api/documents/upload`: Tải lên 1 hoặc nhiều file `.pdf` từ máy tính và gắn vào buổi học (`slide_urls`).
 - `POST /api/documents/remove`: Gỡ một file `.pdf` khỏi danh sách tài liệu của buổi học.
 - `POST /api/workspace/flashcards`: Sinh bộ thẻ lật Flashcard ôn tập từ nội dung PDF của buổi học.
@@ -177,6 +188,7 @@ probation/
 │   │   │   ├── qldt_client.py        # Cào lịch QLĐT PTIT, gộp tiết liên tiếp & Auto-Sync Chủ Nhật
 │   │   │   ├── planner.py            # Phát hiện xung đột (Read-only), tìm giờ trống & lưu lộ trình
 │   │   │   ├── confirmation.py       # Hard Confirmation Gate (HTTP 403 Forbidden)
+│   │   │   ├── internet_time.py      # Tích hợp Internet Time API (timeapi.io + Google Date, Cache 5 phút)
 │   │   │   ├── agent_tools.py        # PyMuPDF Multi-PDF Extractor, Gemini 3.8 Flash + Groq, Cooldown 300s
 │   │   │   ├── json_storage.py       # Đọc/ghi nguyên tử lessons.json, tasks.json, settings.json
 │   │   │   └── seed_data.py          # Khởi tạo file PDF mẫu & dữ liệu lịch PTIT 31 tuần
@@ -188,7 +200,7 @@ probation/
 │   │   ├── lessons.json              # Lịch học cố định phẳng (đã gộp tiết)
 │   │   └── tasks.json                # Lịch tự học linh hoạt (hỗ trợ nhiều file PDF/buổi)
 │   ├── static/slides/                # Thư mục lưu trữ các file Slide PDF bài giảng
-│   ├── tests/test_api.py             # Bộ kiểm thử tự động 15 test cases (Pytest)
+│   ├── tests/test_api.py             # Bộ kiểm thử tự động 23 test cases (Pytest)
 │   ├── Dockerfile                    # Dockerfile cho Backend FastAPI
 │   ├── requirements.txt              # Danh sách thư viện Python
 │   └── .env.example                  # Mẫu cấu hình biến môi trường
@@ -288,7 +300,7 @@ npm run dev
 cd backend
 python -m pytest -v
 ```
-*(Toàn bộ 15/15 test cases kiểm tra 8 API Contracts, Confirmation Gate `403`, gộp tiết QLĐT, trích xuất nhiều file PDF và Cooldown 300s đều đạt `PASSED`).*
+*(Toàn bộ 23/23 test cases kiểm tra 8 API Contracts, Confirmation Gate `403`, Internet Time API, quản lý đa lộ trình, gộp tiết QLĐT, trích xuất nhiều file PDF và Cooldown 300s đều đạt `PASSED`).*
 
 ---
 

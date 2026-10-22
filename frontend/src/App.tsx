@@ -5,8 +5,10 @@ import {
   completeWorkspaceSession,
   confirmReschedule,
   confirmSaveRoadmap,
+  deleteRoadmaps,
   enterWorkspace,
   fetchFlashcards,
+  fetchRoadmapsList,
   generateRoadmap,
   getAgentSettings,
   getStaticUrl,
@@ -26,6 +28,7 @@ import {
   Flashcard,
   Lesson,
   RoadmapDraftResponse,
+  RoadmapItem,
   StudyTask,
   SummaryCard,
   WeekMetadata,
@@ -262,6 +265,8 @@ export function App() {
   const [lastUpdated, setLastUpdated] = useState<string>('--:--');
   const [weeksMeta, setWeeksMeta] = useState<WeekMetadata[]>([]);
   const [selectedWeek, setSelectedWeek] = useState<number>(10);
+  const [liveInternetDate, setLiveInternetDate] = useState<string>('2026-10-22');
+  const [liveDateSource, setLiveDateSource] = useState<string>('timeapi.io (Live Internet)');
 
   // Modals State
   const [showConflictModal, setShowConflictModal] = useState<boolean>(false);
@@ -281,6 +286,12 @@ export function App() {
     '/static/slides/INT1306_BaiTap_ThucHanh_CayNhiPhan.pdf',
   ]);
   const [roadmapDraft, setRoadmapDraft] = useState<RoadmapDraftResponse | null>(null);
+
+  // Roadmap List & Management Modal State
+  const [showRoadmapListModal, setShowRoadmapListModal] = useState<boolean>(false);
+  const [roadmapsList, setRoadmapsList] = useState<RoadmapItem[]>([]);
+  const [selectedRoadmapIds, setSelectedRoadmapIds] = useState<string[]>([]);
+  const [roadmapsLoading, setRoadmapsLoading] = useState<boolean>(false);
 
   // Settings Modal State
   const [showSettingsModal, setShowSettingsModal] = useState<boolean>(false);
@@ -355,6 +366,9 @@ export function App() {
       setDelayPrediction(data.delay_prediction);
       setSyncSource(data.source);
       setLastUpdated(data.last_updated);
+      if (data.today) setLiveInternetDate(data.today);
+      if (data.today_source) setLiveDateSource(data.today_source);
+      if (data.current_week) setSelectedWeek(data.current_week);
       if (data.weeks_metadata && data.weeks_metadata.length > 0) {
         setWeeksMeta(data.weeks_metadata);
       }
@@ -444,10 +458,52 @@ export function App() {
     [conflicts]
   );
 
-  const nextTodoTask = useMemo(() => {
-    const todo = tasks.filter((t) => t.status !== 'done');
-    return todo[0] || tasks[0] || null;
-  }, [tasks]);
+  // Tuần hiện tại tính theo ngày internet live
+  const currentLiveWeek = useMemo(() => {
+    if (!liveInternetDate) return 10;
+    if (weeksMeta && weeksMeta.length > 0) {
+      for (const w of weeksMeta) {
+        if (w.start_date && w.end_date) {
+          const s = parseDdMmYyyyToIso(w.start_date);
+          const e = parseDdMmYyyyToIso(w.end_date);
+          if (liveInternetDate >= s && liveInternetDate <= e) {
+            return w.week;
+          }
+        }
+      }
+    }
+    const semStart = new Date('2026-08-10T00:00:00');
+    const today = new Date(`${liveInternetDate}T00:00:00`);
+    const diffDays = Math.floor((today.getTime() - semStart.getTime()) / (1000 * 60 * 60 * 24));
+    if (diffDays >= 0) {
+      return Math.min(31, Math.floor(diffDays / 7) + 1);
+    }
+    return 10;
+  }, [liveInternetDate, weeksMeta]);
+
+  const sortedTasks = useMemo(
+    () => [...tasks].sort((a, b) => (a.date + a.start).localeCompare(b.date + b.start)),
+    [tasks]
+  );
+
+  // Buổi tự học sắp tới / hiện tại: chưa xong và từ hôm nay trở đi
+  const upcomingTasks = useMemo(
+    () => sortedTasks.filter((t) => t.status !== 'done' && t.date >= liveInternetDate),
+    [sortedTasks, liveInternetDate]
+  );
+
+  // Buổi bị bỏ lỡ: chưa hoàn thành mà đã qua ngày => chậm tiến độ
+  const overdueTasks = useMemo(
+    () => sortedTasks.filter((t) => t.status !== 'done' && t.date < liveInternetDate),
+    [sortedTasks, liveInternetDate]
+  );
+
+  const [showAllTasks, setShowAllTasks] = useState<boolean>(false);
+
+  const nextTodoTask = useMemo(
+    () => upcomingTasks[0] || overdueTasks[0] || null,
+    [upcomingTasks, overdueTasks]
+  );
 
   const weeklyProgress = useMemo(() => {
     const weekTasks = tasks.filter((t) => t.week === selectedWeek);
@@ -541,6 +597,11 @@ export function App() {
     const effectiveUrls = rmSlideUrls.length > 0 ? rmSlideUrls : courseObj.slides;
     setLoading(true);
     try {
+      const todayIso = liveInternetDate;
+      const weekStartIso = currentWeekInfo?.dates?.[0] || todayIso;
+      // Không bao giờ xếp lịch tự học ở các ngày trong quá khứ trước hôm nay (lấy từ Internet time API)
+      const effectiveBaseDate = weekStartIso < todayIso ? todayIso : weekStartIso;
+
       const draft = await generateRoadmap({
         course_code: courseObj.code,
         course_name: courseObj.name,
@@ -548,6 +609,7 @@ export function App() {
         daily_free_hours: rmDailyHours,
         slide_url: effectiveUrls[0],
         slide_urls: effectiveUrls,
+        base_date: effectiveBaseDate,
       });
       setRoadmapDraft(draft);
       showNotification(
@@ -596,10 +658,66 @@ export function App() {
     }
   }
 
+  // Handlers for Roadmap List & Batch Delete
+  async function handleOpenRoadmapListModal() {
+    setRoadmapsLoading(true);
+    setShowRoadmapListModal(true);
+    try {
+      const data = await fetchRoadmapsList();
+      setRoadmapsList(data.roadmaps || []);
+      setSelectedRoadmapIds([]);
+    } catch (err: any) {
+      showNotification('error', err.message || 'Lỗi khi tải danh sách lộ trình');
+    } finally {
+      setRoadmapsLoading(false);
+    }
+  }
+
+  function handleToggleSelectRoadmap(id: string) {
+    setSelectedRoadmapIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  }
+
+  function handleToggleSelectAllRoadmaps() {
+    if (selectedRoadmapIds.length === roadmapsList.length) {
+      setSelectedRoadmapIds([]);
+    } else {
+      setSelectedRoadmapIds(roadmapsList.map((r) => r.roadmap_id));
+    }
+  }
+
+  async function handleDeleteRoadmaps(idsToDelete: string[]) {
+    if (idsToDelete.length === 0) return;
+    const count = idsToDelete.length;
+    const confirmed = window.confirm(
+      `Xác nhận xóa: Bạn có chắc chắn muốn xóa ${count} lộ trình tự học đã chọn không?\nToàn bộ các buổi tự học thuộc các lộ trình này sẽ được xóa khỏi thời khóa biểu.`
+    );
+    if (!confirmed) return;
+
+    setRoadmapsLoading(true);
+    try {
+      const res = await deleteRoadmaps({ roadmap_ids: idsToDelete });
+      showNotification('success', res.message || `Đã xóa ${res.deleted_count} buổi tự học.`);
+      const refreshed = await fetchRoadmapsList();
+      setRoadmapsList(refreshed.roadmaps || []);
+      setSelectedRoadmapIds([]);
+      await handleSyncSchedule(false);
+    } catch (err: any) {
+      showNotification('error', err.message || 'Lỗi khi xóa lộ trình');
+    } finally {
+      setRoadmapsLoading(false);
+    }
+  }
+
   // Handler for Delay Prediction Widget Action (with Confirmation Gate)
   async function handleAddExtraSessionFromWidget() {
     const confirmed = window.confirm(
-      'Xác nhận (Confirmation Gate): Bạn có đồng ý để Agent xếp thêm 1 buổi học bù chống trễ hạn tối nay (19:30 - 21:00) vào lịch cá nhân không?'
+      `Xác nhận (Confirmation Gate): Bạn có đồng ý để Agent xếp 1 buổi học bù ${
+        delayPrediction?.suggested_date || liveInternetDate
+      } (${delayPrediction?.suggested_start || '19:30'} - ${
+        delayPrediction?.suggested_end || '21:00'
+      }) cho các buổi bị chậm tiến độ vào lịch cá nhân không?`
     );
     if (!confirmed) return;
     setLoading(true);
@@ -609,9 +727,9 @@ export function App() {
         course_code: delayPrediction?.course_code || 'INT1306',
         course_name: 'Cấu trúc dữ liệu và giải thuật',
         title: 'Học bù tăng cường: Hoàn thành Bài tập lớn (Chống trễ hạn)',
-        date: currentWeekInfo.dates[6] || '2026-10-18',
-        start: '19:30',
-        end: '21:00',
+        date: delayPrediction?.suggested_date || liveInternetDate,
+        start: delayPrediction?.suggested_start || '19:30',
+        end: delayPrediction?.suggested_end || '21:00',
         slide_url: '/static/slides/INT1306_Chuong3_CayNhiPhan.pdf',
         slide_urls: [
           '/static/slides/INT1306_Chuong3_CayNhiPhan.pdf',
@@ -938,47 +1056,6 @@ export function App() {
                 <span>🎓 EasyPlan AI</span>
                 <span className="brand-badge">PTIT QLĐT Sync</span>
               </div>
-
-              <div className="week-selector-bar">
-                <button
-                  className="btn btn-glass"
-                  style={{ padding: '0.2rem 0.55rem' }}
-                  onClick={() => setSelectedWeek((w) => Math.max(1, w - 1))}
-                >
-                  ◀
-                </button>
-                <select
-                  className="week-select"
-                  value={selectedWeek}
-                  onChange={(e) => setSelectedWeek(Number(e.target.value))}
-                >
-                  {(weeksMeta.length > 0
-                    ? weeksMeta
-                    : Array.from({ length: 25 }, (_, idx) => ({
-                        week: idx + 1,
-                        info: `Tuần ${idx + 1}`,
-                        start_date: '',
-                        end_date: '',
-                        lesson_count: 0,
-                      }))
-                  ).map((w) => (
-                    <option key={w.week} value={w.week}>
-                      {w.info || `Tuần ${w.week}`}
-                    </option>
-                  ))}
-                </select>
-                <button
-                  className="btn btn-glass"
-                  style={{ padding: '0.2rem 0.55rem' }}
-                  onClick={() => setSelectedWeek((w) => Math.min(31, w + 1))}
-                >
-                  ▶
-                </button>
-              </div>
-
-              <span className="brand-badge" title="Tự động cào lịch QLĐT vào mỗi Chủ Nhật">
-                🗓️ Auto-Sync Chủ Nhật: {settings?.auto_sync_sunday !== false ? 'BẬT' : 'TẮT'}
-              </span>
             </div>
 
             <div className="nav-actions">
@@ -996,6 +1073,14 @@ export function App() {
                 disabled={loading}
               >
                 🔄 {loading ? 'Đang đồng bộ...' : 'Đồng bộ lịch QLĐT'}
+              </button>
+
+              <button
+                className="btn btn-glass"
+                onClick={handleOpenRoadmapListModal}
+                title="Xem và quản lý các lộ trình học hiện có, xóa lộ trình không dùng"
+              >
+                🗺️ Quản lý lộ trình
               </button>
 
               <button
@@ -1115,13 +1200,105 @@ export function App() {
                   </div>
                 </div>
 
+                {/* THANH CHUYỂN TUẦN NGAY TRÊN BẢNG LỊCH */}
+                <div className="schedule-toolbar">
+                  <div className="schedule-week-controls">
+                    <button
+                      className="btn btn-outline"
+                      style={{ padding: '0.35rem 0.7rem', fontSize: '0.84rem' }}
+                      onClick={() => setSelectedWeek((w) => Math.max(1, w - 1))}
+                      title="Chuyển sang tuần trước"
+                    >
+                      ◀ Tuần trước
+                    </button>
+
+                    <div className="schedule-week-picker">
+                      <span style={{ fontSize: '1rem' }}>🗓️</span>
+                      <select
+                        className="schedule-week-select"
+                        value={selectedWeek}
+                        onChange={(e) => setSelectedWeek(Number(e.target.value))}
+                      >
+                        {(weeksMeta.length > 0
+                          ? weeksMeta
+                          : Array.from({ length: 25 }, (_, idx) => ({
+                              week: idx + 1,
+                              info: `Tuần ${idx + 1}`,
+                              start_date: '',
+                              end_date: '',
+                              lesson_count: 0,
+                            }))
+                        ).map((w) => (
+                          <option key={w.week} value={w.week}>
+                            {w.info || `Tuần ${w.week}`}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <button
+                      className="btn btn-outline"
+                      style={{ padding: '0.35rem 0.7rem', fontSize: '0.84rem' }}
+                      onClick={() => setSelectedWeek((w) => Math.min(31, w + 1))}
+                      title="Chuyển sang tuần kế tiếp"
+                    >
+                      Tuần sau ▶
+                    </button>
+
+                    {selectedWeek !== currentLiveWeek && (
+                      <button
+                        className="btn btn-glass"
+                        style={{
+                          padding: '0.3rem 0.65rem',
+                          fontSize: '0.78rem',
+                          color: 'var(--primary-700)',
+                          borderColor: 'var(--primary-200)',
+                          background: 'var(--primary-50)',
+                          fontWeight: 600,
+                        }}
+                        onClick={() => setSelectedWeek(currentLiveWeek)}
+                        title="Quay lại tuần học hiện tại"
+                      >
+                        🎯 Về tuần hiện tại (Tuần {currentLiveWeek})
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="schedule-week-stats">
+                    <span>
+                      📅 Khoảng thời gian: <strong>{formatShortDate(currentWeekInfo.dates[0])}</strong> đến{' '}
+                      <strong>{formatShortDate(currentWeekInfo.dates[6])}</strong>
+                    </span>
+                    <span
+                      style={{
+                        marginLeft: '0.75rem',
+                        padding: '0.2rem 0.55rem',
+                        borderRadius: '6px',
+                        background: '#eff6ff',
+                        color: '#1d4ed8',
+                        fontSize: '0.78rem',
+                        fontWeight: 600,
+                        border: '1px solid #bfdbfe',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.3rem',
+                      }}
+                      title={`Nguồn ngày giờ: ${liveDateSource}`}
+                    >
+                      🌐 Hôm nay: <strong>{liveInternetDate}</strong>
+                    </span>
+                  </div>
+                </div>
+
                 <div className="week-columns">
                   {currentWeekInfo.dates.map((isoDate, dayIdx) => {
                     const dayLessons = lessons.filter(
                       (l) => l.date === isoDate && !l.cancelled
                     );
-                    const dayTasks = tasks.filter((t) => t.date === isoDate);
-                    const isToday = isoDate === '2026-10-18' || isoDate === '2026-10-15';
+                    const dayTasks = tasks
+                      .filter((t) => t.date === isoDate)
+                      .sort((a, b) => a.start.localeCompare(b.start));
+                    const isToday = isoDate === liveInternetDate;
 
                     return (
                       <div key={isoDate} className="day-col">
@@ -1229,20 +1406,59 @@ export function App() {
                 {/* Widget 1: Việc cần tự học (Internal To-Do List) */}
                 <div className="card">
                   <div className="card-header">
-                    <span className="card-title">📝 Việc cần tự học ({tasks.length})</span>
-                    <button
-                      className="btn btn-outline"
-                      style={{ padding: '0.25rem 0.6rem', fontSize: '0.75rem' }}
-                      onClick={() => {
-                        setRoadmapDraft(null);
-                        setShowRoadmapModal(true);
-                      }}
-                    >
-                      + Thêm lộ trình
-                    </button>
+                    <span className="card-title">📝 Việc cần tự học ({upcomingTasks.length})</span>
+                    <div style={{ display: 'flex', gap: '0.4rem' }}>
+                      <button
+                        className="btn btn-outline"
+                        style={{ padding: '0.25rem 0.6rem', fontSize: '0.75rem' }}
+                        onClick={handleOpenRoadmapListModal}
+                        title="Xem và quản lý các lộ trình học hiện tại"
+                      >
+                        🗺️ Quản lý lộ trình
+                      </button>
+                      <button
+                        className="btn btn-primary"
+                        style={{ padding: '0.25rem 0.6rem', fontSize: '0.75rem' }}
+                        onClick={() => {
+                          setRoadmapDraft(null);
+                          setShowRoadmapModal(true);
+                        }}
+                      >
+                        + Thêm lộ trình
+                      </button>
+                    </div>
                   </div>
                   <div style={{ padding: '0.9rem 1.1rem' }}>
-                    {tasks.map((t) => {
+                    {overdueTasks.length > 0 && (
+                      <div
+                        style={{
+                          marginBottom: '0.6rem',
+                          padding: '0.4rem 0.6rem',
+                          background: '#fee2e2',
+                          color: '#991b1b',
+                          borderRadius: '6px',
+                          fontSize: '0.76rem',
+                          fontWeight: 600,
+                        }}
+                      >
+                        ⏰ {overdueTasks.length} buổi tự học chậm tiến độ (đã qua ngày chưa hoàn thành)
+                        {delayPrediction?.suggested_action && !delayPrediction.is_resolved
+                          ? ' — xem đề xuất học bù bên dưới.'
+                          : '.'}
+                      </div>
+                    )}
+                    {tasks.length === 0 && (
+                      <div style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                        Chưa có buổi tự học nào. Nhấn “+ Thêm lộ trình” để AI chia lịch tự học từ tài liệu PDF.
+                      </div>
+                    )}
+                    {tasks.length > 0 && !showAllTasks && upcomingTasks.length === 0 && (
+                      <div style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                        Không có buổi tự học sắp tới.
+                      </div>
+                    )}
+                    {(showAllTasks ? sortedTasks : upcomingTasks.slice(0, 3)).map((t) => {
+                      const isOverdue = t.status !== 'done' && t.date < liveInternetDate;
                       const doneSubs = (t.subtasks || []).filter((s) => s.done).length;
                       const totalSubs = (t.subtasks || []).length;
                       const isConf = conflictTaskIds.has(t.task_id);
@@ -1263,12 +1479,12 @@ export function App() {
                                 fontWeight: 700,
                                 padding: '0.1rem 0.45rem',
                                 borderRadius: '4px',
-                                background: isConf
+                                background: isConf || isOverdue
                                   ? '#fee2e2'
                                   : t.status === 'done'
                                   ? '#e2e8f0'
                                   : '#d1fae5',
-                                color: isConf
+                                color: isConf || isOverdue
                                   ? '#991b1b'
                                   : t.status === 'done'
                                   ? '#475569'
@@ -1292,8 +1508,18 @@ export function App() {
                               marginTop: '0.2rem',
                             }}
                           >
-                            <span style={{ fontSize: '0.72rem', color: '#64748b' }}>
-                              {t.status === 'done' ? '✅ Đã hoàn thành' : '⏳ Đang chờ học'}
+                            <span
+                              style={{
+                                fontSize: '0.72rem',
+                                color: isOverdue ? '#b91c1c' : '#64748b',
+                                fontWeight: isOverdue ? 700 : 400,
+                              }}
+                            >
+                              {t.status === 'done'
+                                ? '✅ Đã hoàn thành'
+                                : isOverdue
+                                ? '⏰ Chậm tiến độ — cần học bù'
+                                : '⏳ Đang chờ học'}
                             </span>
                             <button
                               className="btn btn-primary"
@@ -1306,12 +1532,21 @@ export function App() {
                         </div>
                       );
                     })}
+                    {(sortedTasks.length > 3 || (showAllTasks && sortedTasks.length > 0)) && (
+                      <button
+                        className="btn btn-outline"
+                        style={{ width: '100%', marginTop: '0.5rem', fontSize: '0.78rem' }}
+                        onClick={() => setShowAllTasks((v) => !v)}
+                      >
+                        {showAllTasks ? 'Thu gọn ▲' : `Xem thêm (${sortedTasks.length} buổi) ▼`}
+                      </button>
+                    )}
                   </div>
                 </div>
 
                 {/* Widget 2: Nguy cơ trễ hạn (Delay Prediction - MOCK) */}
                 {delayPrediction && (
-                  <div className="risk-widget">
+                  <div className={`risk-widget ${delayPrediction.is_resolved ? 'resolved' : ''}`}>
                     <div
                       style={{
                         display: 'flex',
@@ -1320,32 +1555,65 @@ export function App() {
                         marginBottom: '0.4rem',
                       }}
                     >
-                      <strong style={{ color: '#92400e', fontSize: '0.92rem' }}>
-                        ⚡ Dự báo nguy cơ trễ hạn
+                      <strong
+                        style={{
+                          color: delayPrediction.is_resolved ? '#166534' : '#92400e',
+                          fontSize: '0.92rem',
+                        }}
+                      >
+                        {delayPrediction.is_resolved ? '✅ Tiến độ an toàn' : '⚡ Dự báo nguy cơ trễ hạn'}
                       </strong>
                       <span
                         style={{
                           fontSize: '0.68rem',
                           fontWeight: 700,
-                          background: '#fde68a',
-                          color: '#78350f',
+                          background: delayPrediction.is_resolved ? '#bbf7d0' : '#fde68a',
+                          color: delayPrediction.is_resolved ? '#14532d' : '#78350f',
                           padding: '0.15rem 0.45rem',
                           borderRadius: '4px',
                         }}
                       >
-                        MOCK • RỦI RO {delayPrediction.risk_percent}%
+                        {delayPrediction.is_resolved
+                          ? 'ĐÃ GIẢI QUYẾT • AN TOÀN'
+                          : `MOCK • RỦI RO ${delayPrediction.risk_percent}%`}
                       </span>
                     </div>
-                    <p style={{ fontSize: '0.8rem', color: '#78350f', marginBottom: '0.65rem' }}>
+                    <p
+                      style={{
+                        fontSize: '0.8rem',
+                        color: delayPrediction.is_resolved ? '#166534' : '#78350f',
+                        marginBottom: delayPrediction.suggested_action ? '0.65rem' : 0,
+                      }}
+                    >
                       Môn <strong>{delayPrediction.course_code}</strong>: {delayPrediction.reason}
                     </p>
-                    <button
-                      className="btn btn-primary"
-                      style={{ width: '100%', fontSize: '0.8rem' }}
-                      onClick={handleAddExtraSessionFromWidget}
-                    >
-                      ➕ {delayPrediction.suggested_action}
-                    </button>
+                    {delayPrediction.suggested_action ? (
+                      <button
+                        className="btn btn-primary"
+                        style={{ width: '100%', fontSize: '0.8rem' }}
+                        onClick={handleAddExtraSessionFromWidget}
+                      >
+                        ➕ {delayPrediction.suggested_action}
+                      </button>
+                    ) : (
+                      <div
+                        style={{
+                          marginTop: '0.45rem',
+                          padding: '0.35rem 0.6rem',
+                          background: '#dcfce7',
+                          borderRadius: '6px',
+                          fontSize: '0.75rem',
+                          color: '#15803d',
+                          fontWeight: 600,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.35rem',
+                        }}
+                      >
+                        <span>✓</span>
+                        <span>Đã xếp 1 buổi học bù vào thời khóa biểu để chống trễ hạn.</span>
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -1840,6 +2108,223 @@ export function App() {
                 </button>
               </div>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* =====================================================================
+          ROADMAP LIST & MANAGEMENT MODAL (VIEW / SELECT / DELETE ROADMAPS)
+         ===================================================================== */}
+      {showRoadmapListModal && (
+        <div className="modal-backdrop">
+          <div className="modal-box" style={{ maxWidth: '780px' }}>
+            <div className="modal-header-primary">
+              <div>
+                <h3 style={{ color: '#312e81', fontSize: '1.08rem', fontWeight: 800 }}>
+                  🗺️ Danh sách các Lộ trình Tự học Hiện tại
+                </h3>
+                <p style={{ fontSize: '0.78rem', color: '#4338ca' }}>
+                  Quản lý các môn học đã lập kế hoạch. Bạn có thể chọn và xóa một hoặc nhiều lộ trình không còn cần thiết.
+                </p>
+              </div>
+              <button
+                className="btn btn-outline"
+                style={{ padding: '0.3rem 0.6rem' }}
+                onClick={() => setShowRoadmapListModal(false)}
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="modal-body" style={{ padding: '1.25rem' }}>
+              {roadmapsLoading ? (
+                <div style={{ textAlign: 'center', padding: '2rem 0', color: '#6366f1' }}>
+                  ⏳ Đang tải danh sách lộ trình...
+                </div>
+              ) : roadmapsList.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '2.5rem 1rem' }}>
+                  <div style={{ fontSize: '2.5rem', marginBottom: '0.6rem' }}>📚</div>
+                  <h4 style={{ fontSize: '1rem', fontWeight: 700, color: '#1e293b' }}>
+                    Chưa có lộ trình tự học nào
+                  </h4>
+                  <p style={{ fontSize: '0.82rem', color: '#64748b', marginTop: '0.25rem', marginBottom: '1.2rem' }}>
+                    Bạn chưa tạo lộ trình tự học nào từ slide PDF. Hãy tạo lộ trình để AI tự động chia mục tiêu và xếp lịch thông minh!
+                  </p>
+                  <button
+                    className="btn btn-primary"
+                    onClick={() => {
+                      setShowRoadmapListModal(false);
+                      setRoadmapDraft(null);
+                      setShowRoadmapModal(true);
+                    }}
+                  >
+                    ✨ + Tạo lộ trình mới ngay
+                  </button>
+                </div>
+              ) : (
+                <>
+                  {/* Toolbar: Select All + Batch Delete */}
+                  <div
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      marginBottom: '1rem',
+                      padding: '0.6rem 0.85rem',
+                      background: '#f8fafc',
+                      borderRadius: '8px',
+                      border: '1px solid #e2e8f0',
+                      flexWrap: 'wrap',
+                      gap: '0.5rem',
+                    }}
+                  >
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.84rem', fontWeight: 600, cursor: 'pointer' }}>
+                      <input
+                        type="checkbox"
+                        checked={selectedRoadmapIds.length === roadmapsList.length && roadmapsList.length > 0}
+                        onChange={handleToggleSelectAllRoadmaps}
+                      />
+                      Chọn tất cả ({selectedRoadmapIds.length}/{roadmapsList.length} lộ trình)
+                    </label>
+
+                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                      {selectedRoadmapIds.length > 0 && (
+                        <button
+                          className="btn btn-danger"
+                          style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem', fontWeight: 700 }}
+                          onClick={() => handleDeleteRoadmaps(selectedRoadmapIds)}
+                        >
+                          🗑️ Xóa {selectedRoadmapIds.length} lộ trình đã chọn
+                        </button>
+                      )}
+
+                      <button
+                        className="btn btn-outline"
+                        style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem' }}
+                        onClick={() => {
+                          setShowRoadmapListModal(false);
+                          setRoadmapDraft(null);
+                          setShowRoadmapModal(true);
+                        }}
+                      >
+                        + Thêm lộ trình khác
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* List of Roadmaps */}
+                  <div style={{ display: 'grid', gap: '0.85rem', maxHeight: '55vh', overflowY: 'auto' }}>
+                    {roadmapsList.map((rm) => {
+                      const isSelected = selectedRoadmapIds.includes(rm.roadmap_id);
+                      return (
+                        <div
+                          key={rm.roadmap_id}
+                          style={{
+                            padding: '1rem',
+                            borderRadius: '10px',
+                            border: isSelected ? '2px solid #6366f1' : '1px solid #e2e8f0',
+                            background: isSelected ? '#f5f3ff' : '#ffffff',
+                            boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                            transition: 'all 0.15s ease',
+                          }}
+                        >
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.75rem' }}>
+                            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem' }}>
+                              <input
+                                type="checkbox"
+                                checked={isSelected}
+                                onChange={() => handleToggleSelectRoadmap(rm.roadmap_id)}
+                                style={{ marginTop: '0.3rem', width: '1.1rem', height: '1.1rem', cursor: 'pointer' }}
+                              />
+                              <div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                                  <span
+                                    style={{
+                                      fontSize: '0.75rem',
+                                      fontWeight: 800,
+                                      padding: '0.15rem 0.5rem',
+                                      borderRadius: '6px',
+                                      background: '#e0e7ff',
+                                      color: '#3730a3',
+                                    }}
+                                  >
+                                    {rm.course_code}
+                                  </span>
+                                  <strong style={{ fontSize: '0.98rem', color: '#1e293b' }}>
+                                    {rm.course_name}
+                                  </strong>
+                                </div>
+
+                                <div
+                                  style={{
+                                    display: 'flex',
+                                    gap: '1rem',
+                                    fontSize: '0.78rem',
+                                    color: '#475569',
+                                    marginTop: '0.45rem',
+                                    flexWrap: 'wrap',
+                                  }}
+                                >
+                                  <span>📅 <strong>{rm.start_date}</strong> → <strong>{rm.end_date}</strong></span>
+                                  <span>📚 Tổng số: <strong>{rm.total_sessions} buổi</strong></span>
+                                  <span style={{ color: '#15803d' }}>✓ Hoàn thành: <strong>{rm.completed_sessions}</strong></span>
+                                  {rm.overdue_sessions > 0 && (
+                                    <span style={{ color: '#b91c1c', fontWeight: 700 }}>
+                                      ⏰ Chậm tiến độ: {rm.overdue_sessions}
+                                    </span>
+                                  )}
+                                </div>
+
+                                {rm.slide_urls && rm.slide_urls.length > 0 && (
+                                  <div style={{ marginTop: '0.4rem', fontSize: '0.74rem', color: '#64748b' }}>
+                                    📄 Tài liệu: {rm.slide_urls.map((u) => u.split('/').pop()).join(', ')}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+
+                            <button
+                              className="btn btn-outline"
+                              style={{
+                                padding: '0.3rem 0.65rem',
+                                fontSize: '0.78rem',
+                                color: '#b91c1c',
+                                borderColor: '#fca5a5',
+                                background: '#fef2f2',
+                                whiteSpace: 'nowrap',
+                              }}
+                              onClick={() => handleDeleteRoadmaps([rm.roadmap_id])}
+                              title="Xóa lộ trình này"
+                            >
+                              🗑️ Xóa lộ trình
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
+            </div>
+
+            <div
+              style={{
+                padding: '0.85rem 1.25rem',
+                borderTop: '1px solid #e2e8f0',
+                display: 'flex',
+                justifyContent: 'flex-end',
+                background: '#f8fafc',
+                borderBottomLeftRadius: '1rem',
+                borderBottomRightRadius: '1rem',
+              }}
+            >
+              <button
+                className="btn btn-outline"
+                onClick={() => setShowRoadmapListModal(false)}
+              >
+                Đóng
+              </button>
+            </div>
           </div>
         </div>
       )}

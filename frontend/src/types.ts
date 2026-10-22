@@ -39,6 +39,36 @@ export interface StudyTask {
   subtasks: Subtask[];
   personal_notes: string;
   gcal_event_id: string;
+  overdue?: boolean;
+  roadmap_id?: string;
+}
+
+export interface RoadmapItem {
+  roadmap_id: string;
+  course_code: string;
+  course_name: string;
+  total_sessions: number;
+  completed_sessions: number;
+  upcoming_sessions: number;
+  overdue_sessions: number;
+  start_date: string;
+  end_date: string;
+  slide_urls: string[];
+  task_ids: string[];
+}
+
+export interface RoadmapListResponse {
+  status: string;
+  roadmaps: RoadmapItem[];
+  total_roadmaps: number;
+}
+
+export interface RoadmapDeleteResponse {
+  status: string;
+  deleted_count: number;
+  deleted_task_ids: string[];
+  remaining_count: number;
+  message: string;
 }
 
 export interface DelayPrediction {
@@ -46,7 +76,12 @@ export interface DelayPrediction {
   course_code: string;
   risk_percent: number;
   reason: string;
-  suggested_action: string;
+  suggested_action: string | null;
+  is_resolved?: boolean;
+  suggested_date?: string;
+  suggested_start?: string;
+  suggested_end?: string;
+  overdue_task_ids?: string[];
 }
 
 export interface ConflictItem {
@@ -72,9 +107,12 @@ export interface SyncScheduleResponse {
   status: string;
   source: 'live_api' | 'fallback_cache';
   last_updated: string;
+  today?: string;
+  today_source?: string;
+  current_week?: number;
   lessons: Lesson[];
   tasks: StudyTask[];
-  delay_prediction: DelayPrediction;
+  delay_prediction: DelayPrediction | null;
   conflicts: ConflictItem[];
   weeks_metadata?: WeekMetadata[];
 }

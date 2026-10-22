@@ -12,11 +12,31 @@ client = TestClient(app)
 @pytest.fixture(autouse=True)
 def reset_state_before_each_test():
     saved_settings = load_settings()
-    ensure_initial_seed_data(force_reset=True)
+    ensure_initial_seed_data(force_reset=True, demo_tasks=True)
     reset_inactivity_cooldowns()
     yield
     ensure_initial_seed_data(force_reset=True)
     save_settings(saved_settings)
+
+
+def test_first_time_user_has_no_self_study_tasks():
+    ensure_initial_seed_data(force_reset=True)
+    data = client.post("/api/schedule/sync", json={"force_refresh": False}).json()
+    assert data["tasks"] == []
+    assert data["delay_prediction"] is None
+    assert len(data["lessons"]) > 0
+
+
+def test_overdue_tasks_flagged_and_makeup_suggested():
+    data = client.post("/api/schedule/sync", json={"force_refresh": False}).json()
+    today = data["today"]
+    overdue = [t for t in data["tasks"] if t["overdue"]]
+    assert overdue, "demo tasks dated before today and not done must be overdue"
+    assert all(t["status"] != "done" and t["date"] < today for t in overdue)
+    pred = data["delay_prediction"]
+    assert pred["is_resolved"] is False
+    assert pred["suggested_date"] >= today
+    assert pred["overdue_task_ids"]
 
 
 def test_api_1_schedule_sync_and_read_only_conflict_detection():
@@ -150,12 +170,16 @@ def test_api_2_confirm_reschedule_success_and_edge_errors():
 
 
 def test_api_3_and_3_1_roadmap_generate_and_confirm_save_gate():
+    from app.services.internet_time import fetch_internet_date
+    live_today, _ = fetch_internet_date()
+    live_today = live_today.isoformat() if hasattr(live_today, "isoformat") else str(live_today)
+
     gen_resp = client.post(
         "/api/roadmap/generate",
         json={
             "course_code": "INT1306",
             "course_name": "Cấu trúc dữ liệu và giải thuật",
-            "exam_date": "2026-10-25",
+            "exam_date": "2026-11-15",
             "daily_free_hours": 2.0,
             "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf",
         },
@@ -163,7 +187,12 @@ def test_api_3_and_3_1_roadmap_generate_and_confirm_save_gate():
     assert gen_resp.status_code == 200
     draft = gen_resp.json()
     assert draft["status"] == "draft_generated"
-    assert len(draft["suggested_sessions"]) == 3
+    sessions = draft["suggested_sessions"]
+    # Balanced plan: sessions spread over free days before the exam, no duplicate titles
+    assert len(sessions) >= 3
+    assert len({s["title"] for s in sessions}) == len(sessions)
+    assert all(s["suggested_date"] < "2026-11-15" for s in sessions)
+    assert all(s["suggested_date"] >= live_today for s in sessions)
 
     # Rejects save when user_confirmed is "true" (string) or False
     bad_save = client.post(
@@ -211,7 +240,7 @@ def test_api_3_and_3_1_roadmap_generate_and_confirm_save_gate():
     assert good_save.status_code == 200
     saved_data = good_save.json()
     assert saved_data["status"] == "saved"
-    assert len(saved_data["added_task_ids"]) == 3
+    assert len(saved_data["added_task_ids"]) == len(sessions)
 
 
 def test_api_4_workspace_enter_and_edge_case_2_pdf_extraction():
@@ -306,3 +335,146 @@ def test_api_7_workspace_complete():
     assert card["completed_tasks_count"] == "2 / 3 Tasks"
     assert card["completion_rate_percent"] == 67
     assert card["remaining_subtasks"] == ["Làm 3 câu hỏi trắc nghiệm cuối bài"]
+
+
+def test_api_8_flashcards_generation():
+    resp = client.post(
+        "/api/workspace/flashcards",
+        json={"task_id": "task_001", "count": 3},
+    )
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["status"] == "success"
+    assert data["task_id"] == "task_001"
+    assert len(data["flashcards"]) == 3
+    for fc in data["flashcards"]:
+        assert "card_id" in fc and "question" in fc and "answer" in fc
+
+
+def test_settings_endpoints():
+    get_res = client.get("/api/settings")
+    assert get_res.status_code == 200
+    data = get_res.json()
+    assert "auto_sync_sunday" in data
+    assert data["gemini_model"] == "gemini-3.8-flash"
+
+    update_res = client.post(
+        "/api/settings",
+        json={"auto_sync_sunday": False, "hoc_ky": 20261},
+    )
+    assert update_res.status_code == 200
+    assert update_res.json()["auto_sync_sunday"] is False
+
+
+def test_simulate_conflict_and_add_extra_session():
+    # 1. Simulate conflict endpoint
+    sim_res = client.post("/api/schedule/simulate-conflict")
+    assert sim_res.status_code == 200
+    sim_data = sim_res.json()
+    assert sim_data["status"] == "success"
+    assert len(sim_data["conflicts"]) >= 1
+
+    # 2. Add extra session confirmation gate
+    bad_res = client.post(
+        "/api/schedule/add-extra-session",
+        json={
+            "user_confirmed": "yes",
+            "course_code": "INT1306",
+            "course_name": "Cấu trúc dữ liệu",
+            "title": "Học bù tối nay",
+            "date": "2026-10-18",
+            "start": "19:30",
+            "end": "21:00",
+        },
+    )
+    assert bad_res.status_code == 403
+
+    good_res = client.post(
+        "/api/schedule/add-extra-session",
+        json={
+            "user_confirmed": True,
+            "course_code": "INT1306",
+            "course_name": "Cấu trúc dữ liệu",
+            "title": "Học bù tối nay",
+            "date": "2026-10-18",
+            "start": "19:30",
+            "end": "21:00",
+        },
+    )
+    assert good_res.status_code == 200
+    assert len(good_res.json()["added_task_ids"]) == 1
+
+
+def test_documents_upload_and_remove():
+    import fitz
+
+    doc = fitz.open()
+    page = doc.new_page()
+    page.insert_text((50, 50), "Test PDF content upload")
+    pdf_bytes = doc.write()
+    doc.close()
+
+    up_res = client.post(
+        "/api/documents/upload",
+        files={"file": ("test_extra_slide.pdf", pdf_bytes, "application/pdf")},
+        data={"task_id": "task_001", "append": "true"},
+    )
+    assert up_res.status_code == 200
+    up_data = up_res.json()
+    assert up_data["status"] == "uploaded"
+    uploaded_url = up_data["slide_url"]
+
+    rm_res = client.post(
+        "/api/documents/remove",
+        json={"task_id": "task_001", "slide_url": uploaded_url},
+    )
+    assert rm_res.status_code == 200
+    assert rm_res.json()["status"] == "removed"
+
+
+def test_api_get_today_internet_date():
+    resp = client.get("/api/schedule/today")
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["status"] == "ok"
+    assert "today" in data
+    # Format should be YYYY-MM-DD
+    parts = data["today"].split("-")
+    assert len(parts) == 3
+    assert len(parts[0]) == 4
+    assert len(parts[1]) == 2
+    assert len(parts[2]) == 2
+    assert "source" in data
+    assert "current_week" in data
+    assert isinstance(data["current_week"], int)
+
+
+def test_roadmap_list_and_delete():
+    list_res = client.get("/api/roadmap/list")
+    assert list_res.status_code == 200
+    data = list_res.json()
+    assert data["status"] == "ok"
+    assert "roadmaps" in data
+    assert isinstance(data["roadmaps"], list)
+    assert data["total_roadmaps"] == len(data["roadmaps"])
+    assert len(data["roadmaps"]) >= 1
+
+    first_rm = data["roadmaps"][0]
+    rm_id = first_rm["roadmap_id"]
+    assert "course_code" in first_rm
+    assert "total_sessions" in first_rm
+    assert "completed_sessions" in first_rm
+    assert "task_ids" in first_rm
+
+    # Delete the roadmap
+    del_res = client.post("/api/roadmap/delete", json={"roadmap_ids": [rm_id]})
+    assert del_res.status_code == 200
+    del_data = del_res.json()
+    assert del_data["status"] == "deleted"
+    assert del_data["deleted_count"] == first_rm["total_sessions"]
+
+    # Verify roadmap is gone
+    list_after = client.get("/api/roadmap/list").json()
+    assert not any(r["roadmap_id"] == rm_id for r in list_after["roadmaps"])
+
+

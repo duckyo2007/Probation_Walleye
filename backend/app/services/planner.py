@@ -1,7 +1,9 @@
+import uuid
 from datetime import date, datetime, timedelta
 from typing import Any, Dict, List, Optional, Tuple
 from fastapi import HTTPException
 
+from app.services.internet_time import fetch_internet_date
 from app.services.json_storage import load_lessons, load_tasks, save_tasks
 
 
@@ -192,18 +194,76 @@ def resolve_conflicts_and_reschedule(
     return conflicts
 
 
-def compute_delay_prediction(tasks: List[Dict[str, Any]]) -> Dict[str, Any]:
+def is_task_overdue(task: Dict[str, Any], today_iso: str) -> bool:
+    """A study session is overdue (chậm tiến độ) if not done and its date is before today."""
+    return task.get("status") != "done" and (task.get("date") or "") < today_iso
+
+
+def _is_makeup_task(task: Dict[str, Any]) -> bool:
+    title = (task.get("title") or "").lower()
+    return "học bù" in title or "chống trễ hạn" in title or "tăng cường" in title
+
+
+def annotate_overdue(tasks: List[Dict[str, Any]], today_iso: str) -> List[Dict[str, Any]]:
+    """Returns task copies with a computed (non-persisted) `overdue` flag."""
+    return [{**t, "overdue": is_task_overdue(t, today_iso)} for t in tasks]
+
+
+def compute_delay_prediction(
+    tasks: List[Dict[str, Any]],
+    lessons: Optional[List[Dict[str, Any]]] = None,
+    today_iso: Optional[str] = None,
+) -> Optional[Dict[str, Any]]:
     """
-    Returns the Delay Prediction widget payload (marked `is_mock: True` per Week 1/2 spec).
+    Returns the Delay Prediction widget payload (marked `is_mock: True` per Week 1/2 spec),
+    now driven by real overdue sessions: not done and date before today.
+    Returns None when nothing is overdue (e.g. first-time user with no self-study tasks).
+    Suggests a conflict-free makeup slot; marks resolved once an upcoming makeup session exists.
     """
-    todo_tasks = [t for t in tasks if t.get("status") != "done"]
-    primary_course = todo_tasks[0].get("course_code", "INT1306") if todo_tasks else "INT1306"
+    if today_iso is None:
+        today_iso = fetch_internet_date()[0].isoformat()
+
+    overdue = [t for t in tasks if is_task_overdue(t, today_iso)]
+    if not overdue:
+        return None
+
+    primary_course = overdue[0].get("course_code", "INT1306")
+    overdue_ids = [t.get("task_id") for t in overdue]
+
+    has_upcoming_makeup = any(
+        _is_makeup_task(t) and t.get("status") != "done" and (t.get("date") or "") >= today_iso
+        for t in tasks
+    )
+    if has_upcoming_makeup:
+        return {
+            "is_mock": True,
+            "course_code": primary_course,
+            "risk_percent": 12,
+            "is_resolved": True,
+            "reason": f"Đã xếp buổi học bù cho {len(overdue)} phiên bị chậm tiến độ. Tiến độ đã an toàn.",
+            "suggested_action": None,
+            "overdue_task_ids": overdue_ids,
+        }
+
+    try:
+        s_date, s_start, s_end = find_free_slot_on_or_after(
+            today_iso, 90, lessons if lessons is not None else load_lessons(), tasks
+        )
+    except Exception:
+        s_date, s_start, s_end = today_iso, "19:30", "21:00"
+
+    d = parse_date_strict(s_date)
     return {
         "is_mock": True,
         "course_code": primary_course,
-        "risk_percent": 78,
-        "reason": "Bạn đã lỡ 2 phiên tự học tuần này. Còn 3 ngày nữa đến hạn nộp bài tập lớn.",
-        "suggested_action": "Xếp thêm 1 buổi học bù tối nay (19:30 - 21:00)",
+        "risk_percent": min(95, 40 + 15 * len(overdue)),
+        "is_resolved": False,
+        "reason": f"Chậm tiến độ: bạn đã bỏ lỡ {len(overdue)} phiên tự học (chưa hoàn thành mà đã qua ngày).",
+        "suggested_action": f"Xếp lịch học bù {d.day:02d}/{d.month:02d} ({s_start} - {s_end})",
+        "suggested_date": s_date,
+        "suggested_start": s_start,
+        "suggested_end": s_end,
+        "overdue_task_ids": overdue_ids,
     }
 
 
@@ -269,6 +329,81 @@ def apply_reschedule(
     return updated_summary
 
 
+DAY_START = 8 * 60          # earliest self-study start
+DAY_END = 22 * 60 + 30      # latest self-study end
+LESSON_BUFFER = 15          # rest/travel buffer around school lessons
+MIN_BLOCK = 45              # shorter gaps are not worth a session
+MAX_BLOCK = 120             # longest single session before forcing a break
+BREAK_BETWEEN_BLOCKS = 15
+SLOT_STEP = 15              # round allocations to 15-minute granularity
+
+
+def _free_windows(busy: List[Tuple[int, int]]) -> List[Tuple[int, int]]:
+    """Returns free [start, end) windows inside the study day, each >= MIN_BLOCK."""
+    merged: List[List[int]] = []
+    for s, e in sorted((max(DAY_START, s), min(DAY_END, e)) for s, e in busy):
+        if e <= s:
+            continue
+        if merged and s <= merged[-1][1]:
+            merged[-1][1] = max(merged[-1][1], e)
+        else:
+            merged.append([s, e])
+    windows: List[Tuple[int, int]] = []
+    cursor = DAY_START
+    for s, e in merged:
+        if s - cursor >= MIN_BLOCK:
+            windows.append((cursor, s))
+        cursor = max(cursor, e)
+    if DAY_END - cursor >= MIN_BLOCK:
+        windows.append((cursor, DAY_END))
+    return windows
+
+
+def _window_preference(win: Tuple[int, int]) -> Tuple[int, int]:
+    """Prefer evening (19:30), then afternoon (14:00), then morning windows."""
+    s, e = win
+    for rank, anchor in enumerate((19 * 60 + 30, 14 * 60, 9 * 60)):
+        if s <= anchor < e:
+            return rank, s
+    return 3, s
+
+
+def _place_minutes(windows: List[Tuple[int, int]], minutes: int) -> List[Tuple[int, int]]:
+    """Places `minutes` of study into the day's free windows (preferred windows first)."""
+    blocks: List[Tuple[int, int]] = []
+    remaining = minutes
+    for ws, we in sorted(windows, key=_window_preference):
+        cursor = ws
+        # Start at the anchor (e.g. 19:30) when the window allows it, otherwise as late/early as fits
+        rank, _ = _window_preference((ws, we))
+        anchor = (19 * 60 + 30, 14 * 60, 9 * 60, ws)[rank]
+        if anchor + min(remaining, MAX_BLOCK) <= we:
+            cursor = anchor
+        elif we - min(remaining, MAX_BLOCK) >= ws:
+            cursor = we - min(remaining, MAX_BLOCK)
+        while remaining >= MIN_BLOCK:
+            cursor += (-cursor) % SLOT_STEP  # align start to :00/:15/:30/:45
+            if we - cursor < MIN_BLOCK:
+                break
+            # Absorb a small leftover (< MIN_BLOCK) into this block instead of dropping it
+            max_len = remaining if remaining - MAX_BLOCK < MIN_BLOCK else MAX_BLOCK
+            length = min(remaining, max_len, we - cursor)
+            length -= length % SLOT_STEP
+            if length < MIN_BLOCK:
+                break
+            blocks.append((cursor, cursor + length))
+            remaining -= length
+            cursor += length + BREAK_BETWEEN_BLOCKS
+        if remaining < MIN_BLOCK:
+            break
+    if blocks and 0 < remaining < MIN_BLOCK:
+        # Try to extend the last placed block by the leftover minutes
+        s, e = blocks[-1]
+        if any(ws <= s and e + remaining <= we for ws, we in windows):
+            blocks[-1] = (s, e + remaining)
+    return sorted(blocks)
+
+
 def find_conflict_free_slots_for_roadmap(
     exam_date_str: str,
     daily_free_hours: float,
@@ -276,51 +411,111 @@ def find_conflict_free_slots_for_roadmap(
     base_date_str: Optional[str] = None,
 ) -> List[Tuple[str, str, str]]:
     """
-    Deterministically finds `num_sessions` conflict-free slots before `exam_date_str`
+    Deterministically builds a balanced, conflict-free study plan before `exam_date_str`
     using Python time arithmetic (never relying on LLM for date/time math).
+
+    Algorithm (load balancing / "water-filling"):
+      1. Target total study time = `daily_free_hours` x number of study days.
+      2. For every day, compute real free capacity (school lessons + buffer and existing
+         self-study sessions are blocked), capped at 2x the daily target (max 4h).
+      3. Every day gets an equal share; busy days that cannot fit their share push the
+         deficit to free days (make-up study), so no free day is left empty.
+      4. Each day's minutes are placed into its free windows (evening preferred), split
+         into blocks of at most 2h with a 15-minute break.
+    `num_sessions` is kept as the minimum number of sessions for backward compatibility.
     """
     exam_date = parse_date_strict(exam_date_str)
-    # Default start date: 2026-10-16 (within PTIT Week 10) or today if earlier than exam_date
+    # Query live internet time API to get today's date in Vietnam (UTC+7)
+    live_today, time_source = fetch_internet_date()
+
     if base_date_str:
-        start_date = parse_date_strict(base_date_str)
+        requested_start = parse_date_strict(base_date_str)
+        # Constrain start_date so it is never earlier than today's live internet date
+        start_date = max(requested_start, live_today)
     else:
-        default_anchor = date(2026, 10, 16)
-        start_date = default_anchor if default_anchor < exam_date else exam_date - timedelta(days=max(3, num_sessions))
+        start_date = live_today if live_today < exam_date else exam_date - timedelta(days=max(3, num_sessions))
 
     if exam_date < start_date:
         raise HTTPException(
             status_code=400,
-            detail="exam_date must not be in the past relative to the study start date",
+            detail=f"exam_date ({exam_date}) must not be in the past relative to the live study start date ({start_date})",
         )
 
-    duration_minutes = int(round(max(1.0, min(4.0, daily_free_hours)) * 60))
     lessons = load_lessons()
     tasks = load_tasks()
-    virtual_tasks = [dict(t) for t in tasks]
+
+    last_day = exam_date - timedelta(days=1) if exam_date > start_date else start_date
+    days = [
+        (start_date + timedelta(days=i)).strftime("%Y-%m-%d")
+        for i in range((last_day - start_date).days + 1)
+    ]
+
+    daily_target = int(round(max(0.5, min(8.0, daily_free_hours)) * 60))
+    day_cap_limit = min(240, daily_target * 2)
+
+    windows_by_day: Dict[str, List[Tuple[int, int]]] = {}
+    capacity: Dict[str, int] = {}
+    for d in days:
+        busy: List[Tuple[int, int]] = []
+        for les in lessons:
+            if les.get("cancelled") or les.get("date") != d:
+                continue
+            try:
+                busy.append((time_to_minutes(les["start"]) - LESSON_BUFFER, time_to_minutes(les["end"]) + LESSON_BUFFER))
+            except Exception:
+                pass
+        existing_minutes = 0
+        for tsk in tasks:
+            if tsk.get("status") == "done" or tsk.get("date") != d:
+                continue
+            try:
+                s, e = time_to_minutes(tsk["start"]), time_to_minutes(tsk["end"])
+                busy.append((s - BREAK_BETWEEN_BLOCKS, e + BREAK_BETWEEN_BLOCKS))
+                existing_minutes += max(0, e - s)
+            except Exception:
+                pass
+        wins = _free_windows(busy)
+        windows_by_day[d] = wins
+        free_total = sum(we - ws for ws, we in wins)
+        # Existing self-study on that day already counts toward the daily cap
+        cap = max(0, min(free_total, day_cap_limit - existing_minutes))
+        capacity[d] = cap - cap % SLOT_STEP if cap >= MIN_BLOCK else 0
+
+    available = [d for d in days if capacity[d] > 0]
+    if not available:
+        raise HTTPException(
+            status_code=409,
+            detail="Không còn khung giờ trống đủ dài trước ngày thi để xếp buổi tự học.",
+        )
+
+    # Water-filling: equal share, busy days' deficit flows to free days
+    total_budget = daily_target * len(days)
+    alloc: Dict[str, int] = {d: 0 for d in available}
+    remaining_days = sorted(available, key=lambda d: capacity[d])
+    budget = total_budget
+    while remaining_days and budget >= MIN_BLOCK:
+        share = budget / len(remaining_days)
+        d = remaining_days[0]
+        if capacity[d] <= share:
+            alloc[d] = capacity[d]          # busy day: take what fits
+        else:
+            # all remaining days can absorb an equal share
+            for rd in remaining_days:
+                give = int(share) - int(share) % SLOT_STEP
+                alloc[rd] = max(MIN_BLOCK, min(capacity[rd], give))
+            break
+        budget -= alloc[d]
+        remaining_days.pop(0)
 
     slots: List[Tuple[str, str, str]] = []
-    curr_date = start_date
-    for i in range(num_sessions):
-        target_str = curr_date.strftime("%Y-%m-%d")
-        s_date, s_start, s_end = find_free_slot_on_or_after(
-            target_date_str=target_str,
-            duration_minutes=duration_minutes,
-            lessons=lessons,
-            tasks=virtual_tasks,
-        )
-        slots.append((s_date, s_start, s_end))
-        virtual_tasks.append(
-            {
-                "task_id": f"temp_roadmap_{i}",
-                "date": s_date,
-                "start": s_start,
-                "end": s_end,
-                "status": "todo",
-            }
-        )
-        next_day = parse_date_strict(s_date) + timedelta(days=1)
-        curr_date = next_day if next_day <= exam_date else parse_date_strict(s_date)
+    for d in days:
+        minutes = alloc.get(d, 0)
+        if minutes < MIN_BLOCK:
+            continue
+        for s, e in _place_minutes(windows_by_day[d], minutes):
+            slots.append((d, minutes_to_time(s), minutes_to_time(e)))
 
+    slots.sort()
     return slots
 
 
@@ -348,6 +543,7 @@ def save_confirmed_roadmap_sessions(
             existing_nums.append(int(tid[5:]))
     next_num = (max(existing_nums) + 1) if existing_nums else 1
 
+    generated_roadmap_id = f"rm_{course_code}_{uuid.uuid4().hex[:6]}"
     added_ids: List[str] = []
     for session in approved_sessions:
         s_date = str(session.get("date") or "").strip()
@@ -406,6 +602,7 @@ def save_confirmed_roadmap_sessions(
 
         task_obj = {
             "task_id": new_tid,
+            "roadmap_id": session.get("roadmap_id") or generated_roadmap_id,
             "week": week_num,
             "date": s_date,
             "start": s_start,
@@ -428,6 +625,119 @@ def save_confirmed_roadmap_sessions(
 
     save_tasks(tasks)
     return added_ids
+
+
+def get_all_roadmaps(
+    tasks: Optional[List[Dict[str, Any]]] = None,
+    today_iso: Optional[str] = None,
+) -> List[Dict[str, Any]]:
+    """
+    Returns grouped roadmap summaries across all self-study tasks in `tasks.json`.
+    """
+    if tasks is None:
+        tasks = load_tasks()
+    if today_iso is None:
+        live_today, _ = fetch_internet_date()
+        today_iso = live_today.isoformat()
+
+    grouped: Dict[str, List[Dict[str, Any]]] = {}
+    for t in tasks:
+        rid = t.get("roadmap_id")
+        if not rid:
+            cc = t.get("course_code") or "CUSTOM"
+            rid = f"rm_{cc}"
+        grouped.setdefault(rid, []).append(t)
+
+    roadmaps: List[Dict[str, Any]] = []
+    for rid, rtasks in grouped.items():
+        if not rtasks:
+            continue
+        sorted_rtasks = sorted(rtasks, key=lambda x: (x.get("date", ""), x.get("start", "")))
+        c_code = sorted_rtasks[0].get("course_code", "")
+        c_name = sorted_rtasks[0].get("course_name", "")
+        start_date = sorted_rtasks[0].get("date", "")
+        end_date = sorted_rtasks[-1].get("date", "")
+
+        all_slides: List[str] = []
+        for t in sorted_rtasks:
+            urls = t.get("slide_urls") or ([t.get("slide_url")] if t.get("slide_url") else [])
+            for u in urls:
+                if u and u not in all_slides:
+                    all_slides.append(u)
+
+        completed_count = sum(1 for t in sorted_rtasks if t.get("status") == "done")
+        overdue_count = sum(
+            1 for t in sorted_rtasks if t.get("status") != "done" and (t.get("date") or "") < today_iso
+        )
+        upcoming_count = sum(
+            1 for t in sorted_rtasks if t.get("status") != "done" and (t.get("date") or "") >= today_iso
+        )
+
+        roadmaps.append(
+            {
+                "roadmap_id": rid,
+                "course_code": c_code,
+                "course_name": c_name,
+                "total_sessions": len(sorted_rtasks),
+                "completed_sessions": completed_count,
+                "upcoming_sessions": upcoming_count,
+                "overdue_sessions": overdue_count,
+                "start_date": start_date,
+                "end_date": end_date,
+                "slide_urls": all_slides,
+                "task_ids": [t.get("task_id") for t in sorted_rtasks],
+            }
+        )
+
+    # Sort roadmaps by start_date descending
+    roadmaps.sort(key=lambda r: (r.get("start_date") or "", r.get("course_code") or ""), reverse=True)
+    return roadmaps
+
+
+def delete_roadmaps(
+    roadmap_ids: Optional[List[str]] = None,
+    task_ids: Optional[List[str]] = None,
+    course_code: Optional[str] = None,
+) -> Dict[str, Any]:
+    """
+    Deletes roadmap sessions matching given roadmap_ids, task_ids, or course_code from `tasks.json`.
+    """
+    tasks = load_tasks()
+    rid_set = set(roadmap_ids or [])
+    tid_set = set(task_ids or [])
+    c_code = (course_code or "").strip()
+
+    remaining: List[Dict[str, Any]] = []
+    deleted_ids: List[str] = []
+
+    for t in tasks:
+        t_id = t.get("task_id")
+        t_rid = t.get("roadmap_id") or f"rm_{t.get('course_code')}"
+        t_cc = t.get("course_code")
+
+        is_match = False
+        if t_rid in rid_set:
+            is_match = True
+        elif f"rm_{t_cc}" in rid_set or t_cc in rid_set:
+            is_match = True
+        elif t_id in tid_set:
+            is_match = True
+        elif c_code and t_cc == c_code:
+            is_match = True
+
+        if is_match:
+            deleted_ids.append(t_id)
+        else:
+            remaining.append(t)
+
+    save_tasks(remaining)
+    return {
+        "status": "deleted",
+        "deleted_count": len(deleted_ids),
+        "deleted_task_ids": deleted_ids,
+        "remaining_count": len(remaining),
+        "message": f"Đã xóa thành công {len(deleted_ids)} buổi tự học.",
+    }
 
 
 def complete_workspace_session(

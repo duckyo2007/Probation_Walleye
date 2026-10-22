@@ -431,7 +431,11 @@ def build_default_tasks() -> List[Dict[str, Any]]:
     ]
 
 
-def ensure_initial_seed_data(force_reset: bool = False) -> Dict[str, int]:
+def ensure_initial_seed_data(force_reset: bool = False, demo_tasks: bool = False) -> Dict[str, int]:
+    """
+    Seeds lessons and tasks. First-time users start with NO self-study tasks (only school
+    lessons); pass `demo_tasks=True` (tests / demo helpers) to seed the sample sessions.
+    """
     ensure_sample_pdfs()
     if force_reset or not LESSONS_FILE.exists():
         lessons = build_default_lessons()
@@ -440,7 +444,7 @@ def ensure_initial_seed_data(force_reset: bool = False) -> Dict[str, int]:
         lessons = json.loads(LESSONS_FILE.read_text(encoding="utf-8"))
 
     if force_reset or not TASKS_FILE.exists():
-        tasks = build_default_tasks()
+        tasks = build_default_tasks() if demo_tasks else []
         save_tasks(tasks)
     else:
         tasks = json.loads(TASKS_FILE.read_text(encoding="utf-8"))

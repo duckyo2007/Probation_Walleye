@@ -1,10 +1,14 @@
 import {
   AgentSettings,
   ConflictItem,
+  DelayPrediction,
   DocumentContext,
   Flashcard,
   Lesson,
+  RoadmapDeleteResponse,
   RoadmapDraftResponse,
+  RoadmapItem,
+  RoadmapListResponse,
   StudyTask,
   SummaryCard,
   SyncScheduleResponse,
@@ -74,6 +78,7 @@ export async function generateRoadmap(payload: {
   daily_free_hours: number;
   slide_url: string;
   slide_urls?: string[];
+  base_date?: string;
 }): Promise<RoadmapDraftResponse> {
   const res = await fetch(`${API_BASE}/api/roadmap/generate`, {
     method: 'POST',
@@ -248,10 +253,21 @@ export async function simulateConflictDemo(): Promise<{
   conflicts: ConflictItem[];
   lessons: Lesson[];
   tasks: StudyTask[];
+  delay_prediction?: DelayPrediction;
 }> {
   const res = await fetch(`${API_BASE}/api/schedule/simulate-conflict`, {
     method: 'POST',
   });
+  return handleJson(res);
+}
+
+export async function fetchTodayDate(): Promise<{
+  status: string;
+  today: string;
+  source: string;
+  current_week: number;
+}> {
+  const res = await fetch(`${API_BASE}/api/schedule/today`);
   return handleJson(res);
 }
 
@@ -272,4 +288,24 @@ export async function addExtraStudySession(payload: {
     body: JSON.stringify(payload),
   });
   return handleJson(res);
+}
+
+// GET /api/roadmap/list
+export async function fetchRoadmapsList(): Promise<RoadmapListResponse> {
+  const res = await fetch(`${API_BASE}/api/roadmap/list`);
+  return handleJson<RoadmapListResponse>(res);
+}
+
+// POST /api/roadmap/delete
+export async function deleteRoadmaps(payload: {
+  roadmap_ids: string[];
+  task_ids?: string[];
+  course_code?: string;
+}): Promise<RoadmapDeleteResponse> {
+  const res = await fetch(`${API_BASE}/api/roadmap/delete`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  return handleJson<RoadmapDeleteResponse>(res);
 }
