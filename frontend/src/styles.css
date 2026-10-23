@@ -625,23 +625,6 @@ body {
   background: #334155;
 }
 
-.pomodoro-bar {
-  background: linear-gradient(90deg, #eef2ff 0%, #e0e7ff 100%);
-  padding: 0.85rem 1.15rem;
-  border-bottom: 1px solid #c7d2fe;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-}
-
-.pomodoro-clock {
-  font-size: 1.65rem;
-  font-weight: 800;
-  color: #312e81;
-  font-variant-numeric: tabular-nums;
-}
 
 .chat-messages {
   flex: 1;

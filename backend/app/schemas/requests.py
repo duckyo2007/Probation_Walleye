@@ -1,4 +1,4 @@
-from typing import Any, List, Optional
+from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, Field
 
 
@@ -69,6 +69,7 @@ class TutorChatRequest(BaseModel):
     user_message: str = Field(..., min_length=1)
     code_snippet: Optional[str] = ""
     chat_history: List[ChatHistoryItem] = Field(default_factory=list)
+    images: List[str] = Field(default_factory=list)
 
 
 class InactivityCheckRequest(BaseModel):
@@ -79,9 +80,16 @@ class InactivityCheckRequest(BaseModel):
 
 class WorkspaceCompleteRequest(BaseModel):
     task_id: str = Field(..., min_length=1)
-    pomodoro_completed: int = Field(default=1, ge=0)
+    pomodoro_completed: Optional[int] = Field(default=1, ge=0)
     completed_subtask_ids: List[str] = Field(default_factory=list)
     personal_notes: Optional[str] = ""
+    study_duration_seconds: Optional[int] = Field(default=None, ge=0)
+    chat_history: Optional[List[Dict[str, Any]]] = Field(default_factory=list)
+
+
+class WorkspaceSaveChatRequest(BaseModel):
+    task_id: str = Field(..., min_length=1)
+    chat_history: List[Dict[str, Any]] = Field(default_factory=list)
 
 
 class FlashcardGenerateRequest(BaseModel):

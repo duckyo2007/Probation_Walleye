@@ -1168,6 +1168,22 @@
     "gcal_event_id": "gcal_evt_INT1306_20261011_0800"
   },
   {
+    "key": "INT1306_2026-10-15_0700",
+    "week": 10,
+    "date": "2026-10-15",
+    "start": "07:00",
+    "end": "09:50",
+    "course_code": "INT1306",
+    "course_name": "Cấu trúc dữ liệu và giải thuật",
+    "teacher": "Bùi Văn Kiên",
+    "room": "704-A2-704-A2(HN)",
+    "online": false,
+    "cancelled": false,
+    "makeup": true,
+    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf",
+    "gcal_event_id": "gcal_evt_INT1306_20261015_0700"
+  },
+  {
     "key": "SKD1101_2026-10-15_0700",
     "week": 10,
     "date": "2026-10-15",

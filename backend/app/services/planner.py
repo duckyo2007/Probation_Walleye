@@ -742,14 +742,18 @@ def delete_roadmaps(
 
 def complete_workspace_session(
     task_id: str,
-    pomodoro_completed: int,
-    completed_subtask_ids: List[str],
+    pomodoro_completed: int = 1,
+    completed_subtask_ids: Optional[List[str]] = None,
     personal_notes: str = "",
+    study_duration_seconds: Optional[int] = None,
+    chat_history: Optional[List[Dict[str, Any]]] = None,
 ) -> Dict[str, Any]:
     """
     Tool 7 (`complete_workspace_session`):
-    Updates `tasks.json` with completed subtasks, Pomodoro count, and personal notes,
-    and returns the summary card matching API Contract 7.
+    Updates `tasks.json` with completed subtasks, actual elapsed study time,
+    learning performance evaluation (struggling / excellent / normal), personal notes,
+    and chat history conversation for reviewing.
+    Returns the summary card matching API Contract 7.
     """
     tasks = load_tasks()
     target: Optional[Dict[str, Any]] = None
@@ -780,20 +784,149 @@ def complete_workspace_session(
     total_subs = len(subtasks)
     completion_rate = int(round((done_count / total_subs) * 100)) if total_subs > 0 else 100
 
+    # 1. Planned study duration
+    planned_minutes = 60
+    s_start = target.get("start")
+    s_end = target.get("end")
+    if s_start and s_end:
+        try:
+            diff = time_to_minutes(s_end) - time_to_minutes(s_start)
+            if diff > 0:
+                planned_minutes = diff
+        except Exception:
+            pass
+
+    # 2. Actual study time
     pomo_target = int(target.get("pomodoro_target") or 2)
-    pomo_done = max(0, int(pomodoro_completed))
+    pomo_done = max(0, int(pomodoro_completed or 1))
+
+    if study_duration_seconds is not None and study_duration_seconds > 0:
+        actual_seconds = int(study_duration_seconds)
+        actual_minutes = round(actual_seconds / 60, 1)
+        total_focus_minutes = max(1, int(round(actual_seconds / 60)))
+    else:
+        total_focus_minutes = pomo_done * 25
+        actual_seconds = total_focus_minutes * 60
+        actual_minutes = float(total_focus_minutes)
+
+    def format_study_seconds(sec: int) -> str:
+        m = sec // 60
+        s = sec % 60
+        if m == 0:
+            return f"{s} giây"
+        if s == 0:
+            return f"{m} phút"
+        return f"{m} phút {s} giây"
+
+    ratio = round((actual_minutes / planned_minutes) * 100) if planned_minutes > 0 else 100
+
+    # 3. Learning Performance Evaluation
+    # - Quá thời gian dự kiến (actual > planned): Phân tích khúc mắc và gợi ý hỗ trợ
+    # - Sớm hơn khoảng 75% (actual <= planned * 0.75): Hiểu bài rất tốt
+    # - Còn lại: Hoàn thành bình thường / đúng tiến độ
+    if actual_minutes > planned_minutes:
+        eval_status = "struggling"
+        eval_category = "Có thể đang gặp khúc mắc"
+        eval_badge = "💡 Cần hỗ trợ / Khúc mắc"
+        eval_message = (
+            f"Thời gian học của bạn ({format_study_seconds(actual_seconds)}) vượt quá thời gian dự kiến ({planned_minutes} phút). "
+            "Có vẻ bạn đang gặp khúc mắc ở một số nội dung khó hoặc bài tập cần nhiều thời gian đào sâu. "
+            "Hãy tận dụng AI trợ giảng để gỡ rối các khái niệm khó hoặc ghi lại để trao đổi thêm với giảng viên nhé!"
+        )
+        eval_tips = [
+            "Đặt câu hỏi cho AI trợ giảng hoặc chụp ảnh bài tập cần giải đáp",
+            "Chia nhỏ tài liệu bài học và ôn lại từng phần trọng tâm",
+            "Dùng tính năng Flashcard để củng cố các định nghĩa quan trọng",
+        ]
+    elif actual_minutes <= planned_minutes * 0.75:
+        eval_status = "excellent"
+        eval_category = "Hiểu bài rất tốt"
+        eval_badge = "🌟 Hiểu bài rất tốt"
+        eval_message = (
+            f"Bạn đã hoàn thành phiên học rất nhanh chóng ({format_study_seconds(actual_seconds)} / {planned_minutes} phút dự kiến, đạt ~{ratio}% thời gian). "
+            "Tốc độ tiếp thu của bạn rất ấn tượng và bạn nắm vững kiến thức rất tốt!"
+        )
+        eval_tips = [
+            "Tiếp tục duy trì phong độ tập trung xuất sắc này!",
+            "Thử sức với các bài tập nâng cao hoặc ôn trước tài liệu buổi sau",
+        ]
+    else:
+        eval_status = "normal"
+        eval_category = "Hoàn thành đúng tiến độ"
+        eval_badge = "✅ Hoàn thành đúng tiến độ"
+        eval_message = (
+            f"Bạn đã hoàn thành phiên học với nhịp độ học tập chuẩn xác ({format_study_seconds(actual_seconds)} / {planned_minutes} phút dự kiến). "
+            "Bạn duy trì được sự tập trung đều đặn và tiếp thu bài bản toàn bộ mục tiêu!"
+        )
+        eval_tips = [
+            "Duy trì thói quen học tập đều đặn mỗi ngày",
+            "Đọc lại các ghi chú cá nhân trước khi bước vào buổi học tiếp theo",
+        ]
+
+    evaluation = {
+        "status": eval_status,
+        "category": eval_category,
+        "badge": eval_badge,
+        "message": eval_message,
+        "actual_minutes": actual_minutes,
+        "actual_seconds": actual_seconds,
+        "planned_minutes": planned_minutes,
+        "ratio_percent": ratio,
+        "tips": eval_tips,
+    }
+
     target["pomodoro_Completed"] = pomo_done
+    target["actual_study_seconds"] = actual_seconds
+    target["actual_study_minutes"] = actual_minutes
+    target["planned_study_minutes"] = planned_minutes
+    target["evaluation"] = evaluation
     target["personal_notes"] = personal_notes or ""
-    target["status"] = "done" if (done_count == total_subs and total_subs > 0) or pomo_done > 0 else "in_progress"
+    if chat_history is not None:
+        target["chat_history"] = chat_history
+    target["status"] = "done" if (done_count == total_subs and total_subs > 0) or pomo_done > 0 or actual_seconds > 0 else "in_progress"
 
     save_tasks(tasks)
 
     return {
         "task_title": target.get("title", ""),
-        "total_focus_minutes": pomo_done * 25,
+        "total_focus_minutes": total_focus_minutes,
+        "study_duration_seconds": actual_seconds,
+        "study_duration_formatted": format_study_seconds(actual_seconds),
+        "planned_focus_minutes": planned_minutes,
+        "evaluation": evaluation,
         "pomodoro_result": f"{pomo_done} / {pomo_target} Pomodoro",
         "completed_tasks_count": f"{done_count} / {total_subs} Tasks",
         "completion_rate_percent": completion_rate,
         "remaining_subtasks": remaining_subtasks,
         "personal_notes": target["personal_notes"],
+    }
+
+
+def save_workspace_chat_history(
+    task_id: str,
+    chat_history: List[Dict[str, Any]],
+) -> Dict[str, Any]:
+    """
+    Saves or updates the session conversation (chat history) into tasks.json
+    so that students can review past conversations at any time.
+    """
+    tasks = load_tasks()
+    target: Optional[Dict[str, Any]] = None
+    for t in tasks:
+        if t.get("task_id") == task_id:
+            target = t
+            break
+
+    if target is None:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Task ID '{task_id}' not found in tasks.json",
+        )
+
+    target["chat_history"] = chat_history
+    save_tasks(tasks)
+    return {
+        "status": "saved",
+        "task_id": task_id,
+        "messages_count": len(chat_history),
     }

@@ -35,6 +35,82 @@ def resolve_slide_path(slide_url: Optional[str]) -> Optional[Path]:
     return candidate if candidate.exists() and candidate.is_file() else None
 
 
+def _ocr_pdf_with_gemini(
+    path: Path,
+    filename: str,
+    page_count: int,
+    course_name: str,
+    max_pages: int = 10,
+) -> Optional[str]:
+    """
+    OCR helper: when a PDF is image-only (no selectable text), renders each page
+    as a PNG image and sends it to Gemini Vision to extract the text content.
+    Returns extracted text or None if OCR is unavailable/failed.
+    """
+    try:
+        settings = load_settings()
+        api_key = str(settings.get("gemini_api_key") or "").strip()
+        if not api_key:
+            return None
+
+        import base64
+        from google.genai import types as gtypes
+
+        doc = fitz.open(str(path))
+        pages_to_ocr = min(page_count, max_pages)
+        extracted_pages: List[str] = []
+
+        client = genai.Client(api_key=api_key, http_options={"timeout": 60000})
+
+        # Use first available model (supports lite fallback if flash quota exhausted)
+        ocr_models = _ordered_models_for_call(api_key)
+        ocr_model = ocr_models[0] if ocr_models else "gemini-3.5-flash-lite"
+
+        for idx in range(pages_to_ocr):
+            page = doc[idx]
+            # Render at 2x zoom for better OCR accuracy
+            mat = fitz.Matrix(2.0, 2.0)
+            pix = page.get_pixmap(matrix=mat)
+            img_bytes = pix.tobytes("png")
+            img_b64 = base64.b64encode(img_bytes).decode("utf-8")
+
+            try:
+                response = client.models.generate_content(
+                    model=ocr_model,
+                    contents=[
+                        gtypes.Part.from_bytes(data=img_bytes, mime_type="image/png"),
+                        gtypes.Part.from_text(
+                            text="Đây là một trang từ tài liệu PDF bài giảng. "
+                            "Hãy trích xuất TOÀN BỘ văn bản, công thức, và nội dung có trong ảnh này theo thứ tự từ trên xuống dưới. "
+                            "Chỉ trả về nội dung text thuần túy, không thêm giải thích."
+                        ),
+                    ],
+                    config=gtypes.GenerateContentConfig(
+                        temperature=0.1,
+                        max_output_tokens=2000,
+                        thinking_config=gtypes.ThinkingConfig(thinking_budget=0),
+                    ),
+                )
+                page_text = getattr(response, "text", None) or ""
+                if page_text.strip():
+                    extracted_pages.append(f"--- Trang {idx + 1} ---\n{page_text.strip()}")
+            except Exception:
+                pass  # skip failed pages silently
+
+        doc.close()
+
+        if not extracted_pages:
+            return None
+
+        result = "\n\n".join(extracted_pages)
+        if page_count > max_pages:
+            result += f"\n\n[Lưu ý: Chỉ OCR {max_pages}/{page_count} trang đầu tiên]"
+        return result
+
+    except Exception:
+        return None
+
+
 def extract_document_content(
     slide_url: Optional[str],
     course_name: str = "Cấu trúc dữ liệu và giải thuật",
@@ -79,18 +155,19 @@ def extract_document_content(
 
         full_text = "\n\n".join(pages_text).strip()
         if len(full_text) < 20:
-            fallback_text = (
-                f"[OCR Fallback - Tài liệu dạng ảnh quét ({filename}) môn {course_name}]\n"
-                f"Tài liệu gồm {page_count} trang. Nội dung trọng tâm: Khái niệm cốt lõi, "
-                f"cấu trúc dữ liệu, độ phức tạp thuật toán và các bước cài đặt đệ quy/vòng lặp."
-            )
+            # PDF là file ảnh quét → thử OCR bằng Gemini Vision
+            ocr_text = _ocr_pdf_with_gemini(path, filename, page_count, course_name)
             result = {
                 "slide_url": clean_url,
                 "filename": filename,
                 "context_loaded": True,
                 "page_count": page_count,
-                "document_status": "ocr_fallback",
-                "extracted_text": fallback_text,
+                "document_status": "ocr_fallback" if not ocr_text else "loaded",
+                "extracted_text": ocr_text or (
+                    f"[Tài liệu dạng ảnh quét ({filename}) môn {course_name}]\n"
+                    f"Tài liệu gồm {page_count} trang. Không thể trích xuất text tự động.\n"
+                    f"Vui lòng cấu hình Gemini API Key để bật OCR tự động."
+                ),
             }
         else:
             result = {
@@ -190,62 +267,129 @@ def extract_multi_documents_content(
     }
 
 
+# Ordered list of Gemini models to try (primary first, then flash & flash-lite fallbacks)
+# Note: Google GenAI free tier has separate quota pools for flash vs flash-lite!
+GEMINI_FALLBACK_MODELS = [
+    GEMINI_MODEL,              # gemini-3.8-flash (primary)
+    "gemini-3.7-flash",        # Flash 3.7
+    "gemini-3.6-flash",        # Flash 3.6
+    "gemini-3.5-flash",        # Flash 3.5
+    "gemini-3.5-flash-lite",   # Flash-Lite 3.5 (separate free quota bucket!)
+    "gemini-3.1-flash-lite",   # Flash-Lite 3.1 (separate free quota bucket!)
+    "gemini-flash-lite-latest",# Flash-Lite latest (separate free quota bucket!)
+]
+
+# Track models that recently failed with 429 / 503 to avoid retrying them repeatedly
+_MODEL_COOLDOWN: Dict[str, float] = {}
+COOLDOWN_DURATION_SECONDS = 900  # 15 minutes cooldown after 429/503 exhaustion
+
+
+def check_gemini_models_health(api_key: Optional[str] = None, force: bool = False) -> List[str]:
+    """Returns currently available models (not in cooldown). Never wastes free-tier quota on dummy pings."""
+    now = time.time()
+    return [m for m in GEMINI_FALLBACK_MODELS if _MODEL_COOLDOWN.get(m, 0) < now]
+
+
+def _ordered_models_for_call(api_key: str = "") -> List[str]:
+    """Healthy/available models first, cooled-down models at the end as last resort."""
+    now = time.time()
+    available = [m for m in GEMINI_FALLBACK_MODELS if _MODEL_COOLDOWN.get(m, 0) < now]
+    in_cooldown = [m for m in GEMINI_FALLBACK_MODELS if _MODEL_COOLDOWN.get(m, 0) >= now]
+    return available + in_cooldown
+
+
+def _call_gemini_with_fallback(
+    system_instruction: str,
+    user_prompt: str,
+    api_key: str,
+    images: Optional[List[tuple]] = None,
+) -> tuple[Optional[str], Optional[str]]:
+    """
+    Calls Google Gemini via the official `google-genai` SDK.
+    Tries GEMINI_FALLBACK_MODELS in order (active models first, cooled-down ones skipped/deprioritized).
+    Sets thinking_budget=0 to disable thinking tokens.
+    `images`: optional list of (bytes, mime_type) sent as multimodal input.
+    Returns (reply_text, model_name_used) or (None, None) on full failure.
+    """
+    if not api_key or not str(api_key).strip():
+        return None, None
+
+    import logging
+    logger = logging.getLogger(__name__)
+
+    def _try_model(model: str) -> Optional[str]:
+        try:
+            from google.genai import types
+            client = genai.Client(api_key=api_key, http_options={"timeout": 45000})
+            if images:
+                contents: Any = [types.Part.from_bytes(data=b, mime_type=m) for b, m in images]
+                contents.append(types.Part.from_text(text=user_prompt))
+            else:
+                contents = user_prompt
+            cfg_kwargs: Dict[str, Any] = {
+                "system_instruction": system_instruction,
+                "temperature": 0.3,
+                "max_output_tokens": 4000 if images else 1500,
+            }
+            if "3.8" in model or "3.7" in model:
+                cfg_kwargs["thinking_config"] = types.ThinkingConfig(thinking_budget=0)
+            response = client.models.generate_content(
+                model=model,
+                contents=contents,
+                config=types.GenerateContentConfig(**cfg_kwargs),
+            )
+            # Primary: response.text shortcut
+            out_txt = getattr(response, "text", None)
+            if out_txt and str(out_txt).strip():
+                _MODEL_COOLDOWN.pop(model, None)
+                return str(out_txt).strip()
+            # Fallback: iterate candidates -> parts (skip thought parts)
+            for candidate in getattr(response, "candidates", []) or []:
+                content = getattr(candidate, "content", None)
+                for part in getattr(content, "parts", []) or []:
+                    if getattr(part, "thought", False):
+                        continue  # skip thinking tokens
+                    text = getattr(part, "text", None)
+                    if text and str(text).strip():
+                        _MODEL_COOLDOWN.pop(model, None)
+                        return str(text).strip()
+            return None
+        except Exception as exc:
+            err_str = str(exc)
+            logger.warning("[Gemini] model=%s failed: %s: %s", model, type(exc).__name__, exc)
+            if "429" in err_str or "RESOURCE_EXHAUSTED" in err_str or "503" in err_str:
+                _MODEL_COOLDOWN[model] = time.time() + COOLDOWN_DURATION_SECONDS
+            return None
+
+    import concurrent.futures
+    for model in _ordered_models_for_call(api_key):
+        ex = concurrent.futures.ThreadPoolExecutor(max_workers=1)
+        future = ex.submit(_try_model, model)
+        try:
+            result = future.result(timeout=45)
+            ex.shutdown(wait=False, cancel_futures=True)
+            if result:
+                _MODEL_COOLDOWN.pop(model, None)
+                logger.info("[Gemini] success with model=%s", model)
+                return result, model
+            if model not in _MODEL_COOLDOWN:
+                _MODEL_COOLDOWN[model] = time.time() + 180
+        except Exception as exc:
+            logger.warning("[Gemini] executor timeout for model=%s: %s", model, exc)
+            _MODEL_COOLDOWN[model] = time.time() + 180
+            ex.shutdown(wait=False, cancel_futures=True)
+
+    return None, None
+
+
 def _call_gemini_3_8_flash(
     system_instruction: str,
     user_prompt: str,
     api_key: str,
 ) -> Optional[str]:
-    """
-    Calls Google Gemini 3.8 Flash (`gemini-3.8-flash`) via the official `google-genai` Interactions API.
-    Properly extracts `interaction.output_text` (as well as `steps` / `outputs` fallbacks).
-    Enforces a strict 10-second non-blocking deadline so invalid keys fall back cleanly to Groq/local tutor.
-    """
-    if not api_key or not str(api_key).strip():
-        return None
-
-    def _execute() -> Optional[str]:
-        try:
-            client = genai.Client(api_key=api_key, http_options={"timeout": 10000})
-            interaction = client.interactions.create(
-                model=GEMINI_MODEL,
-                system_instruction=system_instruction,
-                input=user_prompt,
-            )
-            # 1. Primary property in google-genai Interactions API (`output_text`)
-            out_txt = getattr(interaction, "output_text", None)
-            if out_txt and str(out_txt).strip():
-                return str(out_txt).strip()
-
-            # 2. Check interaction.steps -> ModelOutputStep.content -> TextContent.text
-            for step in getattr(interaction, "steps", []) or []:
-                if getattr(step, "type", None) == "model_output":
-                    for c_item in getattr(step, "content", []) or []:
-                        if getattr(c_item, "text", None):
-                            return str(c_item.text).strip()
-
-            # 3. Check interaction.outputs
-            for output in getattr(interaction, "outputs", []) or []:
-                if getattr(output, "type", None) == "text" and getattr(output, "text", None):
-                    return str(output.text).strip()
-
-            # 4. Direct .text fallback
-            if getattr(interaction, "text", None):
-                return str(interaction.text).strip()
-
-            return None
-        except Exception:
-            return None
-
-    import concurrent.futures
-    ex = concurrent.futures.ThreadPoolExecutor(max_workers=1)
-    future = ex.submit(_execute)
-    try:
-        result = future.result(timeout=10)
-        ex.shutdown(wait=False, cancel_futures=True)
-        return result
-    except Exception:
-        ex.shutdown(wait=False, cancel_futures=True)
-        return None
+    """Compatibility wrapper — returns only the text (discards model name)."""
+    text, _ = _call_gemini_with_fallback(system_instruction, user_prompt, api_key)
+    return text
 
 
 def _call_groq_fallback(
@@ -372,13 +516,57 @@ def _build_contextual_tutor_reply(
                 "```"
             )
 
-    if "bst" in msg_lower or "nhị phân" in msg_lower or "duyệt" in msg_lower or "xóa" in msg_lower:
+    # 3. Simple math check (e.g. 1+1)
+    if "1+1" in msg_lower or "1 + 1" in msg_lower:
         return (
-            f"### Giải thích từ Slide bài giảng ({course_name})\n\n"
-            "- **Cây nhị phân tìm kiếm (BST - Binary Search Tree)**: Với mọi nút `N`, tất cả các khóa ở cây con bên trái đều **nhỏ hơn** `N->data`, và tất cả các khóa ở cây con bên phải đều **lớn hơn** `N->data`.\n"
+            "### AI trợ giảng\n\n"
+            "**1 + 1 = 2**.\n\n"
+            "Nếu bạn cần giải thích thêm bài tập trong slide hoặc hỗ trợ phân tích code, bạn cứ hỏi mình nhé!"
+        )
+
+    # 4. Traversal questions (cách duyệt, tiền thứ tự, trung thứ tự, hậu thứ tự, BFS, DFS)
+    if any(k in msg_lower for k in ["cách nào để duyệt", "các cách duyệt", "phương pháp duyệt", "phép duyệt", "duyệt cây", "traversal", "tiền thứ tự", "trung thứ tự", "hậu thứ tự"]):
+        return (
+            f"### Các phương pháp Duyệt Cây nhị phân ({course_name})\n\n"
+            "Có **2 nhóm phương pháp duyệt chính** cho Cây nhị phân:\n\n"
+            "#### 1. Duyệt theo chiều sâu (DFS - Depth First Search):\n"
+            "- **Tiền thứ tự (Pre-order)**: `Gốc` → `Con Trái` → `Con Phải` (ứng dụng sao chép cây, tạo biểu thức tiền tố).\n"
+            "- **Trung thứ tự (In-order)**: `Con Trái` → `Gốc` → `Con Phải` (với BST, duyệt In-order sẽ cho dãy khóa tăng dần).\n"
+            "- **Hậu thứ tự (Post-order)**: `Con Trái` → `Con Phải` → `Gốc` (ứng dụng khi giải phóng bộ nhớ cây, tính kích thước thư mục).\n\n"
+            "#### 2. Duyệt theo chiều rộng (BFS - Breadth First Search):\n"
+            "- **Duyệt theo mức (Level-order)**: Dùng hàng đợi `std::queue`, duyệt lần lượt từng tầng từ trên xuống dưới, từ trái sang phải."
+        )
+
+    # 5. Tree implementation / setup questions (cài đặt, khởi tạo, struct Node)
+    if any(k in msg_lower for k in ["cài đặt", "khởi tạo", "tạo cây", "cấu trúc node", "struct node", "cài đặt cây"]):
+        return (
+            f"### Cài đặt Cây nhị phân trong C++ ({course_name})\n\n"
+            "Cây nhị phân được cài đặt bằng cấu trúc con trỏ liên kết động:\n\n"
+            "```cpp\n"
+            "#include <iostream>\n"
+            "using namespace std;\n\n"
+            "struct Node {\n"
+            "    int data;           // Giá trị lưu tại nút\n"
+            "    Node* left;         // Con trỏ trỏ tới con trái\n"
+            "    Node* right;        // Con trỏ trỏ tới con phải\n\n"
+            "    Node(int val) : data(val), left(nullptr), right(nullptr) {}\n"
+            "};\n\n"
+            "// Hàm tạo nút mới\n"
+            "Node* createNode(int val) {\n"
+            "    return new Node(val);\n"
+            "}\n"
+            "```\n\n"
+            "- Mỗi nút cấp phát động qua toán tử `new`. Khi không dùng nữa cần giải phóng bằng phép duyệt Post-order."
+        )
+
+    # 6. BST deletion or properties
+    if any(k in msg_lower for k in ["bst", "xóa nút", "xóa node", "cây nhị phân tìm kiếm"]):
+        return (
+            f"### Cây nhị phân tìm kiếm (BST - Binary Search Tree) & Thao tác Xóa nút ({course_name})\n\n"
+            "- **Định nghĩa BST**: Với mọi nút `N`, tất cả các khóa ở cây con bên trái đều **nhỏ hơn** `N->data`, và tất cả các khóa ở cây con bên phải đều **lớn hơn** `N->data`.\n"
             "- **Độ phức tạp trung bình**: Tìm kiếm, Thêm mới (`Insert`) và Xóa (`Delete`) đều đạt $\\mathcal{O}(\\log n)$ khi cây cân bằng.\n"
             "- **3 trường hợp xóa nút trong BST**:\n"
-            "  1. Nút lá (0 con): Giải phóng trực tiếp.\n"
+            "  1. Nút lá (0 con): Giải phóng trực tiếp con trỏ.\n"
             "  2. Nút có 1 con: Nối cha của nút đó trực tiếp với nút con duy nhất.\n"
             "  3. Nút có 2 con: Thay giá trị bằng phần tử thế mạng (**In-order Successor** - nhỏ nhất cây con phải) rồi xóa nút thế mạng."
         )
@@ -393,11 +581,86 @@ def _build_contextual_tutor_reply(
     )
 
 
+_PAGE_REF_RE = re.compile(r"(?:trang|page|tr\.)\s*(\d{1,4})(?:\s*(?:-|đến|tới|–)\s*(\d{1,4}))?", re.IGNORECASE)
+_DOC_REF_RE = re.compile(r"(?:tài liệu|file|pdf)\s*(?:số|#)?\s*(\d{1,2})\b", re.IGNORECASE)
+MAX_OCR_PAGES_PER_QUESTION = 4
+
+
+def render_referenced_pages(
+    user_message: str,
+    documents: List[Dict[str, Any]],
+) -> tuple[List[tuple], List[str]]:
+    """
+    Detects page references (e.g. "câu 1.1 ở trang 5", "trang 3-4") in the question and renders
+    those PDF pages as PNG images (+ the following page, in case the exercise continues there).
+    Returns (images [(bytes, mime)], labels ["file.pdf trang 5", ...]).
+    """
+    matches = list(_PAGE_REF_RE.finditer(user_message or ""))
+    if not matches or not documents:
+        return [], []
+
+    # Choose document: explicit "tài liệu 2" / "file 2", else first loaded doc
+    doc_idx = 0
+    dm = _DOC_REF_RE.search(user_message)
+    if dm:
+        n = int(dm.group(1))
+        if 1 <= n <= len(documents):
+            doc_idx = n - 1
+    doc_item = documents[doc_idx]
+    path = resolve_slide_path(doc_item.get("slide_url"))
+    if path is None:
+        return [], []
+
+    pages: List[int] = []
+    for m in matches:
+        start = int(m.group(1))
+        end = int(m.group(2)) if m.group(2) else start + 1  # include next page
+        if end < start:
+            start, end = end, start
+        for p in range(start, end + 1):
+            if p not in pages:
+                pages.append(p)
+
+    images: List[tuple] = []
+    labels: List[str] = []
+    try:
+        doc = fitz.open(str(path))
+        for p in pages:
+            if len(images) >= MAX_OCR_PAGES_PER_QUESTION:
+                break
+            if 1 <= p <= len(doc):
+                pix = doc[p - 1].get_pixmap(matrix=fitz.Matrix(2.0, 2.0))
+                images.append((pix.tobytes("png"), "image/png"))
+                labels.append(f"{doc_item.get('filename') or path.name} trang {p}")
+        doc.close()
+    except Exception:
+        return [], []
+    return images, labels
+
+
+def _decode_user_images(raw_images: Optional[List[str]]) -> List[tuple]:
+    """Decodes data-URL / base64 images uploaded by the user into (bytes, mime)."""
+    import base64
+    out: List[tuple] = []
+    for raw in (raw_images or [])[:4]:
+        try:
+            s = str(raw)
+            mime = "image/png"
+            if s.startswith("data:"):
+                header, s = s.split(",", 1)
+                mime = header[5:].split(";")[0] or mime
+            out.append((base64.b64decode(s), mime))
+        except Exception:
+            continue
+    return out
+
+
 def query_llm_tutor(
     task_id: str,
     user_message: str,
     code_snippet: Optional[str] = "",
     chat_history: Optional[List[Dict[str, str]]] = None,
+    images: Optional[List[str]] = None,
 ) -> Dict[str, Any]:
     """
     Tool 5 (`query_llm_tutor`):
@@ -477,12 +740,30 @@ def query_llm_tutor(
     gemini_key = str(settings.get("gemini_api_key") or "").strip()
     groq_key = str(settings.get("groq_api_key") or "").strip()
 
-    # 1. Try Primary Model: gemini-3.8-flash
-    gemini_reply = _call_gemini_3_8_flash(system_instruction, user_prompt, gemini_key)
+    # Multimodal inputs: user-uploaded images + OCR (render) of referenced PDF pages
+    user_imgs = _decode_user_images(images)
+    page_imgs, page_labels = render_referenced_pages(user_message, doc_info.get("documents", []))
+    all_images = user_imgs + page_imgs
+    if all_images:
+        notes = []
+        if user_imgs:
+            notes.append(f"{len(user_imgs)} ảnh do sinh viên tải lên")
+        if page_labels:
+            notes.append("ảnh chụp các trang PDF: " + ", ".join(page_labels))
+        user_prompt += (
+            "\n\n[ĐÍNH KÈM ẢNH] " + "; ".join(notes) + ". "
+            "Hãy đọc kỹ (OCR) nội dung trong ảnh. Nếu sinh viên hỏi đáp án một câu/bài, hãy tìm đúng câu đó "
+            "(có thể đề bài kéo dài sang trang sau), chép lại đề ngắn gọn rồi giải chi tiết từng bước và nêu đáp án cuối cùng."
+        )
+
+    # 1. Try Gemini (health-checked: 3.8 if available, else 3.6/3.5)
+    gemini_reply, gemini_model_used = _call_gemini_with_fallback(
+        system_instruction, user_prompt, gemini_key, images=all_images or None
+    )
     if gemini_reply:
         return {
             "status": "success",
-            "provider_used": GEMINI_MODEL,
+            "provider_used": gemini_model_used or GEMINI_MODEL,
             "reply_markdown": gemini_reply,
         }
 
@@ -504,7 +785,7 @@ def query_llm_tutor(
     )
     return {
         "status": "success",
-        "provider_used": "groq-fallback",
+        "provider_used": "local-fallback",
         "reply_markdown": fallback_reply,
     }
 

@@ -13,6 +13,7 @@ import {
   getAgentSettings,
   getStaticUrl,
   removeTaskDocument,
+  saveWorkspaceChat,
   sendTutorChat,
   simulateConflictDemo,
   syncSchedule,
@@ -311,16 +312,44 @@ export function App() {
   const [rightPaneTab, setRightPaneTab] = useState<'tutor' | 'flashcards'>('tutor');
   const [checkedSubtasks, setCheckedSubtasks] = useState<Record<string, boolean>>({});
   const [personalNotes, setPersonalNotes] = useState<string>('');
+  // Live study stopwatch state
+  const [studyElapsedSeconds, setStudyElapsedSeconds] = useState<number>(0);
 
-  // Pomodoro Timer State (25:00)
-  const [pomoSeconds, setPomoSeconds] = useState<number>(25 * 60);
-  const [pomoRunning, setPomoRunning] = useState<boolean>(false);
-  const [pomoCompletedCount, setPomoCompletedCount] = useState<number>(1);
+  function formatStudyTime(seconds: number): string {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+    if (h > 0) {
+      return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+  }
 
   // AI Tutor Chat State
   const [chatHistory, setChatHistory] = useState<ChatMessage[]>([]);
   const [userMessage, setUserMessage] = useState<string>('');
   const [showCodeInput, setShowCodeInput] = useState<boolean>(false);
+  const [attachedImages, setAttachedImages] = useState<string[]>([]);
+  const imageInputRef = useRef<HTMLInputElement | null>(null);
+
+  function addImageFiles(files: FileList | File[] | null) {
+    if (!files) return;
+    Array.from(files)
+      .filter((f) => f.type.startsWith('image/'))
+      .slice(0, 4)
+      .forEach((file) => {
+        if (file.size > 8 * 1024 * 1024) {
+          showNotification('error', `Ảnh ${file.name} quá lớn (tối đa 8MB)`);
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = () => {
+          const url = String(reader.result || '');
+          setAttachedImages((prev) => (prev.length >= 4 ? prev : [...prev, url]));
+        };
+        reader.readAsDataURL(file);
+      });
+  }
   const [codeSnippet, setCodeSnippet] = useState<string>(
     'void preOrder(Node* root) {\n    cout << root->data;\n    preOrder(root->left);\n    preOrder(root->right);\n}'
   );
@@ -404,22 +433,6 @@ export function App() {
     loadInitialSettings();
   }, []);
 
-  // Pomodoro countdown effect
-  useEffect(() => {
-    if (!pomoRunning) return;
-    const timer = setInterval(() => {
-      setPomoSeconds((prev) => {
-        if (prev <= 1) {
-          setPomoRunning(false);
-          setPomoCompletedCount((c) => c + 1);
-          showNotification('success', '🎉 Hoàn thành 1 phiên Pomodoro (25 phút tập trung)!');
-          return 25 * 60;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [pomoRunning]);
 
   // Automatic 10-minute inactivity check in Workspace (Screen 03)
   useEffect(() => {
@@ -429,6 +442,16 @@ export function App() {
     }, 10 * 60 * 1000);
     return () => clearTimeout(timer);
   }, [screen, activeTask, userMessage, checkedSubtasks]);
+
+  // Live study stopwatch when in Workspace (Screen 03)
+  useEffect(() => {
+    if (screen !== 'workspace') return;
+    if (activeTask?.status === 'done') return;
+    const interval = setInterval(() => {
+      setStudyElapsedSeconds((prev) => prev + 1);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [screen, activeTask?.status]);
 
   // Compute week date columns
   const currentWeekInfo = useMemo(() => {
@@ -764,21 +787,27 @@ export function App() {
       }
       setCheckedSubtasks(subMap);
       setPersonalNotes(res.task_info.personal_notes || '');
-      setPomoSeconds(25 * 60);
-      setPomoRunning(false);
-      setPomoCompletedCount(Math.max(1, res.task_info.pomodoro_Completed || 1));
 
-      const docCount = res.document.documents?.length || 1;
-      setChatHistory([
-        {
-          role: 'assistant',
-          content: `Chào bạn! Mình đã đọc xong **${docCount} tài liệu PDF** (tổng cộng **${res.document.page_count} trang**, trạng thái: \`${res.document.document_status}\`) của môn **${res.task_info.course_name}**.\n\nHôm nay chúng ta sẽ hoàn thành phiên **"${res.task_info.title}"**. Bạn có thể chuyển đổi qua lại giữa các file PDF ở khung bên trái hoặc hỏi mình bất kỳ câu hỏi lý thuyết / debug code nào nhé!`,
-          provider: 'gemini-3.8-flash',
-        },
-      ]);
+      if (
+        res.task_info.chat_history &&
+        Array.isArray(res.task_info.chat_history) &&
+        res.task_info.chat_history.length > 0
+      ) {
+        setChatHistory(res.task_info.chat_history);
+      } else {
+        const docCount = res.document.documents?.length || 1;
+        setChatHistory([
+          {
+            role: 'assistant',
+            content: `Chào bạn! Mình đã đọc xong **${docCount} tài liệu PDF** (tổng cộng **${res.document.page_count} trang**, trạng thái: \`${res.document.document_status}\`) của môn **${res.task_info.course_name}**.\n\nHôm nay chúng ta sẽ hoàn thành phiên **"${res.task_info.title}"**. Bạn có thể chuyển đổi qua lại giữa các file PDF ở khung bên trái hoặc hỏi mình bất kỳ câu hỏi lý thuyết / debug code nào nhé!`,
+            provider: 'AI trợ giảng',
+          },
+        ]);
+      }
       const fcRes = await fetchFlashcards(taskId).catch(() => ({ flashcards: [] }));
       setFlashcards(fcRes.flashcards || []);
       setFlippedCards({});
+      setStudyElapsedSeconds(res.task_info.actual_study_seconds || 0);
       setScreen('workspace');
     } catch (err: any) {
       showNotification('error', err.message || 'Không thể mở không gian học tập');
@@ -791,7 +820,9 @@ export function App() {
   async function handleSendTutorMessage(customQuestion?: string) {
     if (!activeTask) return;
     const msgText = (customQuestion ?? userMessage).trim();
-    if (!msgText) return;
+    if (!msgText && attachedImages.length === 0) return;
+    const finalText = msgText || 'Hãy đọc và giải bài trong ảnh này.';
+    const imagesToSend = attachedImages;
 
     const updatedHistory: ChatMessage[] = [
       ...chatHistory,
@@ -799,29 +830,35 @@ export function App() {
         role: 'user',
         content:
           showCodeInput && codeSnippet.trim()
-            ? `${msgText}\n\n\`\`\`cpp\n${codeSnippet}\n\`\`\``
-            : msgText,
+            ? `${finalText}\n\n\`\`\`cpp\n${codeSnippet}\n\`\`\``
+            : finalText,
+        images: imagesToSend.length ? imagesToSend : undefined,
       },
     ];
     setChatHistory(updatedHistory);
     if (!customQuestion) setUserMessage('');
+    setAttachedImages([]);
     setTutorLoading(true);
 
     try {
       const res = await sendTutorChat({
         task_id: activeTask.task_id,
-        user_message: msgText,
+        user_message: finalText,
         code_snippet: showCodeInput ? codeSnippet : '',
         chat_history: chatHistory.map((m) => ({ role: m.role, content: m.content })),
+        images: imagesToSend,
       });
-      setChatHistory((prev) => [
-        ...prev,
-        {
-          role: 'assistant',
-          content: res.reply_markdown,
-          provider: res.provider_used,
-        },
-      ]);
+      const assistantMsg: ChatMessage = {
+        role: 'assistant',
+        content: res.reply_markdown,
+        provider: res.provider_used,
+      };
+      const finalHistory = [...updatedHistory, assistantMsg];
+      setChatHistory(finalHistory);
+      saveWorkspaceChat({
+        task_id: activeTask.task_id,
+        chat_history: finalHistory,
+      }).catch((e) => console.warn('Lỗi lưu lịch sử chat ngầm:', e));
     } catch (err: any) {
       showNotification('error', err.message || 'Lỗi kết nối AI Trợ giảng');
     } finally {
@@ -844,15 +881,20 @@ export function App() {
         current_subtask: currentSub,
       });
       if (res.should_remind && res.message) {
-        setChatHistory((prev) => [
-          ...prev,
-          {
-            role: 'assistant',
-            content: `🔔 **[Nhắc nhở chủ động sau 10 phút không thao tác]**\n${res.message}`,
-            provider: 'proactive-trigger',
-            isProactive: true,
-          },
-        ]);
+        const proactiveMsg: ChatMessage = {
+          role: 'assistant',
+          content: `🔔 **[Nhắc nhở chủ động sau 10 phút không thao tác]**\n${res.message}`,
+          provider: 'proactive-trigger',
+          isProactive: true,
+        };
+        setChatHistory((prev) => {
+          const next = [...prev, proactiveMsg];
+          saveWorkspaceChat({
+            task_id: activeTask.task_id,
+            chat_history: next,
+          }).catch((e) => console.warn('Lỗi lưu lịch sử chat ngầm:', e));
+          return next;
+        });
         showNotification('info', 'AI Trợ giảng vừa gửi gợi ý hỗ trợ chủ động!');
       } else if (res.skip_reason === 'rate_limited') {
         showNotification(
@@ -948,12 +990,12 @@ export function App() {
         .map(([id]) => id);
       const res = await completeWorkspaceSession({
         task_id: activeTask.task_id,
-        pomodoro_completed: pomoCompletedCount,
         completed_subtask_ids: completedIds,
         personal_notes: personalNotes,
+        study_duration_seconds: studyElapsedSeconds,
+        chat_history: chatHistory,
       });
       setSummaryCard(res.summary_card);
-      setPomoRunning(false);
       setScreen('summary');
       await handleSyncSchedule(false);
     } catch (err: any) {
@@ -992,11 +1034,6 @@ export function App() {
     }
   }
 
-  const formatTimer = (sec: number) => {
-    const m = Math.floor(sec / 60);
-    const s = sec % 60;
-    return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-  };
 
   return (
     <div>
@@ -1127,7 +1164,7 @@ export function App() {
                       <strong>
                         {nextTodoTask.slide_urls?.length || 1} tài liệu PDF
                       </strong>{' '}
-                      & AI Trợ giảng Gemini 3.8 Flash sẵn sàng
+                      & AI trợ giảng sẵn sàng
                     </div>
                   </div>
                 </div>
@@ -1366,6 +1403,25 @@ export function App() {
                                 <div className="event-meta">
                                   Môn: {tsk.course_name} ({tsk.course_code})
                                 </div>
+                                {tsk.status === 'done' && (
+                                  <div
+                                    style={{
+                                      marginTop: '0.35rem',
+                                      fontWeight: 700,
+                                      color: '#059669',
+                                      fontSize: '0.72rem',
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      gap: '0.25rem',
+                                      background: 'rgba(5, 150, 105, 0.08)',
+                                      padding: '0.15rem 0.45rem',
+                                      borderRadius: '4px',
+                                      border: '1px solid rgba(5, 150, 105, 0.2)',
+                                    }}
+                                  >
+                                    📖 Xem lại hội thoại
+                                  </div>
+                                )}
                                 {isConflicting && (
                                   <div
                                     style={{
@@ -1511,8 +1567,8 @@ export function App() {
                             <span
                               style={{
                                 fontSize: '0.72rem',
-                                color: isOverdue ? '#b91c1c' : '#64748b',
-                                fontWeight: isOverdue ? 700 : 400,
+                                color: isOverdue ? '#b91c1c' : t.status === 'done' ? '#047857' : '#64748b',
+                                fontWeight: isOverdue || t.status === 'done' ? 700 : 400,
                               }}
                             >
                               {t.status === 'done'
@@ -1522,11 +1578,19 @@ export function App() {
                                 : '⏳ Đang chờ học'}
                             </span>
                             <button
-                              className="btn btn-primary"
-                              style={{ padding: '0.25rem 0.65rem', fontSize: '0.74rem' }}
+                              className={t.status === 'done' ? 'btn btn-outline' : 'btn btn-primary'}
+                              style={{
+                                padding: '0.25rem 0.65rem',
+                                fontSize: '0.74rem',
+                                color: t.status === 'done' ? '#047857' : undefined,
+                                borderColor: t.status === 'done' ? '#10b981' : undefined,
+                                fontWeight: t.status === 'done' ? 700 : undefined,
+                                background: t.status === 'done' ? '#f0fdf4' : undefined,
+                              }}
                               onClick={() => handleEnterWorkspace(t.task_id)}
+                              title={t.status === 'done' ? 'Xem lại cuộc hội thoại của hôm đó' : 'Vào học ngay'}
                             >
-                              Vào học →
+                              {t.status === 'done' ? 'Xem lại hội thoại 📖' : 'Vào học →'}
                             </button>
                           </div>
                         </div>
@@ -2501,8 +2565,25 @@ export function App() {
                 ← Trở về Lịch tuần
               </button>
               <div>
-                <div style={{ fontWeight: 800, fontSize: '1.02rem' }}>
-                  {activeTask.title} ({activeTask.course_code})
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <span style={{ fontWeight: 800, fontSize: '1.02rem' }}>
+                    {activeTask.title} ({activeTask.course_code})
+                  </span>
+                  {activeTask.status === 'done' && (
+                    <span
+                      style={{
+                        background: '#ecfdf5',
+                        color: '#047857',
+                        padding: '0.15rem 0.55rem',
+                        borderRadius: '9999px',
+                        fontSize: '0.72rem',
+                        border: '1px solid #6ee7b7',
+                        fontWeight: 700,
+                      }}
+                    >
+                      📖 Đã hoàn thành
+                    </span>
+                  )}
                 </div>
                 <div style={{ fontSize: '0.76rem', opacity: 0.85 }}>
                   Môn: {activeTask.course_name} • Khung giờ: {activeTask.date} ({activeTask.start} -{' '}
@@ -2512,6 +2593,27 @@ export function App() {
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+              <div
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.45rem',
+                  background: 'rgba(255, 255, 255, 0.18)',
+                  backdropFilter: 'blur(8px)',
+                  border: '1px solid rgba(255, 255, 255, 0.35)',
+                  color: '#ffffff',
+                  padding: '0.35rem 0.85rem',
+                  borderRadius: '9999px',
+                  fontWeight: 700,
+                  fontSize: '0.84rem',
+                }}
+                title={activeTask.status === 'done' ? 'Tổng thời gian đã học của buổi này' : 'Thời gian thực tế bạn đang học trong phiên này'}
+              >
+                <span>{activeTask.status === 'done' ? '⏱️ Đã học:' : '⏱️ Đang học:'}</span>
+                <span style={{ fontVariantNumeric: 'tabular-nums', color: '#fef08a', fontSize: '1rem', fontWeight: 800 }}>
+                  {formatStudyTime(studyElapsedSeconds)}
+                </span>
+              </div>
               <button
                 className="btn btn-glass"
                 onClick={() => workspaceFileInputRef.current?.click()}
@@ -2524,10 +2626,46 @@ export function App() {
                 onClick={handleCompleteSession}
                 disabled={loading}
               >
-                ✓ HOÀN THÀNH PHIÊN TỰ HỌC
+                {activeTask.status === 'done' ? '✓ CẬP NHẬT GHI CHÚ' : '✓ KẾT THÚC BUỔI HỌC'}
               </button>
             </div>
           </header>
+
+          {activeTask.status === 'done' && (
+            <div
+              style={{
+                background: 'linear-gradient(90deg, #ecfdf5 0%, #f0fdf4 100%)',
+                borderBottom: '1px solid #a7f3d0',
+                padding: '0.65rem 1.25rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                fontSize: '0.85rem',
+                color: '#065f46',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem' }}>
+                <span style={{ fontSize: '1.2rem' }}>📖</span>
+                <div>
+                  <strong>Chế độ xem lại buổi học:</strong> Bạn đang xem lại toàn bộ cuộc hội thoại và tài liệu PDF của ngày <strong>{activeTask.date}</strong> ({activeTask.start} - {activeTask.end}). Bạn vẫn có thể tiếp tục hỏi đáp nếu cần đào sâu thêm!
+                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+                <span
+                  style={{
+                    background: '#d1fae5',
+                    color: '#047857',
+                    padding: '0.2rem 0.6rem',
+                    borderRadius: '9999px',
+                    fontSize: '0.76rem',
+                    fontWeight: 700,
+                  }}
+                >
+                  💬 {chatHistory.length} tin nhắn đã lưu
+                </span>
+              </div>
+            </div>
+          )}
 
           <div className="workspace-split">
             {/* LEFT 50% PANE: MULTI-PDF VIEWER & EXTRACTED CONTEXT */}
@@ -2675,51 +2813,8 @@ export function App() {
               )}
             </div>
 
-            {/* RIGHT 50% PANE: POMODORO + SUBTASK CHECKLIST + AI TUTOR / FLASHCARDS */}
+            {/* RIGHT 50% PANE: SUBTASK CHECKLIST + AI TUTOR / FLASHCARDS */}
             <div className="workspace-pane">
-              {/* Pomodoro 25:00 Bar */}
-              <div className="pomodoro-bar">
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
-                  <div className="pomodoro-clock">🍅 {formatTimer(pomoSeconds)}</div>
-                  <div>
-                    <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#312e81' }}>
-                      Đồng hồ Tập trung Pomodoro
-                    </div>
-                    <div style={{ fontSize: '0.72rem', color: '#4338ca' }}>
-                      Đã hoàn thành: <strong>{pomoCompletedCount}</strong> /{' '}
-                      {activeTask.pomodoro_target} Pomodoro ({pomoCompletedCount * 25} phút)
-                    </div>
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', gap: '0.45rem' }}>
-                  <button
-                    className={`btn ${pomoRunning ? 'btn-danger' : 'btn-primary'}`}
-                    style={{ padding: '0.35rem 0.75rem', fontSize: '0.78rem' }}
-                    onClick={() => setPomoRunning((r) => !r)}
-                  >
-                    {pomoRunning ? '⏸ Tạm dừng' : '▶ Bắt đầu'}
-                  </button>
-                  <button
-                    className="btn btn-outline"
-                    style={{ padding: '0.35rem 0.65rem', fontSize: '0.78rem' }}
-                    onClick={() => {
-                      setPomoRunning(false);
-                      setPomoSeconds(25 * 60);
-                    }}
-                  >
-                    ↺ Đặt lại
-                  </button>
-                  <button
-                    className="btn btn-outline"
-                    style={{ padding: '0.35rem 0.65rem', fontSize: '0.78rem' }}
-                    onClick={() => setPomoCompletedCount((c) => c + 1)}
-                    title="Cộng thêm 1 Pomodoro hoàn thành để test nhanh"
-                  >
-                    +1 🍅
-                  </button>
-                </div>
-              </div>
 
               {/* Checklist Tự Học & Ghi chú */}
               <div
@@ -2805,7 +2900,7 @@ export function App() {
                     style={{ padding: '0.3rem 0.7rem', fontSize: '0.76rem' }}
                     onClick={() => setRightPaneTab('tutor')}
                   >
-                    🤖 AI Trợ giảng (Gemini 3.8 Flash)
+                    🤖 AI Trợ giảng
                   </button>
                   <button
                     className={`btn ${
@@ -2847,7 +2942,19 @@ export function App() {
                               marginBottom: '0.35rem',
                             }}
                           >
-                            ⚡ Nguồn phản hồi: {msg.provider}
+                            ⚡ AI trợ giảng
+                          </div>
+                        )}
+                        {msg.images && msg.images.length > 0 && (
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', marginBottom: '0.35rem' }}>
+                            {msg.images.map((src, i) => (
+                              <img
+                                key={i}
+                                src={src}
+                                alt={`Ảnh đính kèm ${i + 1}`}
+                                style={{ maxWidth: '140px', maxHeight: '140px', borderRadius: '8px', objectFit: 'cover' }}
+                              />
+                            ))}
                           </div>
                         )}
                         {msg.role === 'assistant'
@@ -2857,7 +2964,7 @@ export function App() {
                     ))}
                     {tutorLoading && (
                       <div className="chat-bubble assistant">
-                        ⏳ AI Trợ giảng (Gemini 3.8 Flash) đang đọc {sessionDocuments.length} tài liệu
+                        ⏳ AI Trợ giảng đang đọc {sessionDocuments.length} tài liệu
                         PDF và phân tích câu hỏi của bạn...
                       </div>
                     )}
@@ -2873,41 +2980,6 @@ export function App() {
                       gap: '0.5rem',
                     }}
                   >
-                    <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
-                      <button
-                        type="button"
-                        className="btn btn-outline"
-                        style={{ padding: '0.2rem 0.55rem', fontSize: '0.72rem' }}
-                        onClick={() =>
-                          handleSendTutorMessage(
-                            'Cho tôi biết có dùng stack thay cho viết hàm đệ quy khi duyệt cây nhị phân được không?'
-                          )
-                        }
-                      >
-                        💡 Dùng Stack thay Đệ quy?
-                      </button>
-                      <button
-                        type="button"
-                        className="btn btn-outline"
-                        style={{ padding: '0.2rem 0.55rem', fontSize: '0.72rem' }}
-                        onClick={() => {
-                          setShowCodeInput(true);
-                          handleSendTutorMessage(
-                            'Tại sao đoạn code duyệt cây nhị phân của mình lại bị lỗi đệ quy vô tận nhỉ?'
-                          );
-                        }}
-                      >
-                        🐞 Debug code duyệt cây lỗi
-                      </button>
-                      <button
-                        type="button"
-                        className="btn btn-outline"
-                        style={{ padding: '0.2rem 0.55rem', fontSize: '0.72rem' }}
-                        onClick={() => setShowCodeInput((v) => !v)}
-                      >
-                        💻 {showCodeInput ? 'Ẩn ô dán Code' : 'Dán Code cần Debug'}
-                      </button>
-                    </div>
 
                     {showCodeInput && (
                       <textarea
@@ -2920,6 +2992,33 @@ export function App() {
                       />
                     )}
 
+                    {attachedImages.length > 0 && (
+                      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                        {attachedImages.map((src, i) => (
+                          <div key={i} style={{ position: 'relative' }}>
+                            <img
+                              src={src}
+                              alt={`Xem trước ảnh ${i + 1}`}
+                              style={{ width: '64px', height: '64px', objectFit: 'cover', borderRadius: '8px', border: '1px solid #c7d2fe' }}
+                            />
+                            <button
+                              type="button"
+                              id={`remove-image-${i}`}
+                              title="Xóa ảnh"
+                              onClick={() => setAttachedImages((prev) => prev.filter((_, idx) => idx !== i))}
+                              style={{
+                                position: 'absolute', top: '-6px', right: '-6px', width: '20px', height: '20px',
+                                borderRadius: '50%', border: 'none', background: '#ef4444', color: '#fff',
+                                fontSize: '0.7rem', cursor: 'pointer', lineHeight: '20px', padding: 0,
+                              }}
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
                     <form
                       onSubmit={(e) => {
                         e.preventDefault();
@@ -2928,11 +3027,39 @@ export function App() {
                       style={{ display: 'flex', gap: '0.5rem' }}
                     >
                       <input
+                        ref={imageInputRef}
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        style={{ display: 'none' }}
+                        onChange={(e) => {
+                          addImageFiles(e.target.files);
+                          e.target.value = '';
+                        }}
+                      />
+                      <button
+                        type="button"
+                        id="attach-image-btn"
+                        className="btn btn-secondary"
+                        title="Chèn hình ảnh (tối đa 4 ảnh, hoặc dán Ctrl+V)"
+                        onClick={() => imageInputRef.current?.click()}
+                        disabled={tutorLoading || attachedImages.length >= 4}
+                      >
+                        📷
+                      </button>
+                      <input
                         type="text"
                         className="input-field"
-                        placeholder="Hỏi AI Trợ giảng bất kỳ câu hỏi nào..."
+                        placeholder="Hỏi AI trợ giảng (vd: giải câu 1.1 ở trang 5)..."
                         value={userMessage}
                         onChange={(e) => setUserMessage(e.target.value)}
+                        onPaste={(e) => {
+                          const files = Array.from(e.clipboardData.files || []);
+                          if (files.length) {
+                            e.preventDefault();
+                            addImageFiles(files);
+                          }
+                        }}
                       />
                       <button
                         type="submit"
@@ -3031,8 +3158,16 @@ export function App() {
             <div style={{ padding: '1.5rem' }}>
               <div className="summary-stats-grid">
                 <div className="stat-card">
-                  <div className="stat-value">{summaryCard.total_focus_minutes} Phút</div>
-                  <div className="stat-label">{summaryCard.pomodoro_result}</div>
+                  <div className="stat-value">
+                    {summaryCard.study_duration_formatted || `${summaryCard.total_focus_minutes} Phút`}
+                  </div>
+                  <div className="stat-label">Thời gian đã học</div>
+                </div>
+                <div className="stat-card">
+                  <div className="stat-value">
+                    {summaryCard.planned_focus_minutes ? `${summaryCard.planned_focus_minutes} Phút` : '60 Phút'}
+                  </div>
+                  <div className="stat-label">Thời gian dự kiến</div>
                 </div>
                 <div className="stat-card">
                   <div className="stat-value">{summaryCard.completed_tasks_count}</div>
@@ -3043,6 +3178,111 @@ export function App() {
                   <div className="stat-label">Tỷ lệ hoàn thành</div>
                 </div>
               </div>
+
+              {/* Performance / Learning Assessment Card */}
+              {summaryCard.evaluation && (
+                <div
+                  style={{
+                    margin: '1.25rem 0',
+                    padding: '1.15rem 1.35rem',
+                    borderRadius: '0.85rem',
+                    border:
+                      summaryCard.evaluation.status === 'excellent'
+                        ? '1.5px solid #a7f3d0'
+                        : summaryCard.evaluation.status === 'struggling'
+                        ? '1.5px solid #fde68a'
+                        : '1.5px solid #c7d2fe',
+                    background:
+                      summaryCard.evaluation.status === 'excellent'
+                        ? 'linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%)'
+                        : summaryCard.evaluation.status === 'struggling'
+                        ? 'linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%)'
+                        : 'linear-gradient(135deg, #eef2ff 0%, #f5f3ff 100%)',
+                  }}
+                >
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      marginBottom: '0.65rem',
+                      flexWrap: 'wrap',
+                      gap: '0.5rem',
+                    }}
+                  >
+                    <span
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        padding: '0.3rem 0.85rem',
+                        borderRadius: '9999px',
+                        fontSize: '0.84rem',
+                        fontWeight: 800,
+                        color:
+                          summaryCard.evaluation.status === 'excellent'
+                            ? '#065f46'
+                            : summaryCard.evaluation.status === 'struggling'
+                            ? '#92400e'
+                            : '#3730a3',
+                        background:
+                          summaryCard.evaluation.status === 'excellent'
+                            ? '#d1fae5'
+                            : summaryCard.evaluation.status === 'struggling'
+                            ? '#fef3c7'
+                            : '#e0e7ff',
+                      }}
+                    >
+                      {summaryCard.evaluation.badge}
+                    </span>
+                    <span style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600 }}>
+                      Thời gian sử dụng: {summaryCard.evaluation.ratio_percent}% dự kiến
+                    </span>
+                  </div>
+                  <p
+                    style={{
+                      fontSize: '0.9rem',
+                      lineHeight: 1.6,
+                      color:
+                        summaryCard.evaluation.status === 'excellent'
+                          ? '#047857'
+                          : summaryCard.evaluation.status === 'struggling'
+                          ? '#78350f'
+                          : '#312e81',
+                      margin: 0,
+                      fontWeight: 500,
+                    }}
+                  >
+                    {summaryCard.evaluation.message}
+                  </p>
+                  {summaryCard.evaluation.tips && summaryCard.evaluation.tips.length > 0 && (
+                    <div
+                      style={{
+                        marginTop: '0.85rem',
+                        paddingTop: '0.75rem',
+                        borderTop: '1px dashed rgba(0,0,0,0.12)',
+                      }}
+                    >
+                      <strong style={{ fontSize: '0.8rem', color: '#475569' }}>
+                        💡 Đề xuất hỗ trợ từ AI trợ giảng:
+                      </strong>
+                      <ul
+                        style={{
+                          margin: '0.35rem 0 0 1.25rem',
+                          fontSize: '0.82rem',
+                          color: '#475569',
+                          lineHeight: 1.5,
+                        }}
+                      >
+                        {summaryCard.evaluation.tips.map((tip, idx) => (
+                          <li key={idx} style={{ marginTop: '0.25rem' }}>
+                            {tip}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {summaryCard.remaining_subtasks.length > 0 && (
                 <div
@@ -3091,13 +3331,32 @@ export function App() {
                 </div>
               )}
 
-              <button
-                className="btn btn-primary"
-                style={{ width: '100%', padding: '0.75rem', fontSize: '0.95rem' }}
-                onClick={() => setScreen('dashboard')}
-              >
-                ✓ LƯU TIẾN ĐỘ & VỀ TRANG CHỦ
-              </button>
+              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
+                <button
+                  type="button"
+                  className="btn btn-outline"
+                  style={{
+                    flex: 1,
+                    padding: '0.75rem',
+                    fontSize: '0.92rem',
+                    borderColor: '#059669',
+                    color: '#059669',
+                    fontWeight: 700,
+                    background: '#f0fdf4',
+                  }}
+                  onClick={() => setScreen('workspace')}
+                >
+                  📖 Xem lại hội thoại buổi học
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  style={{ flex: 1, padding: '0.75rem', fontSize: '0.92rem' }}
+                  onClick={() => setScreen('dashboard')}
+                >
+                  ✓ VỀ THỜI KHÓA BIỂU
+                </button>
+              </div>
             </div>
           </div>
         </div>

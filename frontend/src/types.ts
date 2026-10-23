@@ -32,8 +32,8 @@ export interface StudyTask {
   title: string;
   status: 'todo' | 'in_progress' | 'done';
   is_flexible: boolean;
-  pomodoro_target: number;
-  pomodoro_Completed: number;
+  pomodoro_target?: number;
+  pomodoro_Completed?: number;
   slide_url: string;
   slide_urls?: string[];
   subtasks: Subtask[];
@@ -41,6 +41,11 @@ export interface StudyTask {
   gcal_event_id: string;
   overdue?: boolean;
   roadmap_id?: string;
+  actual_study_seconds?: number;
+  actual_study_minutes?: number;
+  planned_study_minutes?: number;
+  evaluation?: StudyEvaluation;
+  chat_history?: ChatMessage[];
 }
 
 export interface RoadmapItem {
@@ -166,13 +171,30 @@ export interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
   provider?: string;
+  images?: string[];
   isProactive?: boolean;
+}
+
+export interface StudyEvaluation {
+  status: 'excellent' | 'normal' | 'struggling';
+  category: string;
+  badge: string;
+  message: string;
+  actual_minutes: number;
+  actual_seconds: number;
+  planned_minutes: number;
+  ratio_percent: number;
+  tips?: string[];
 }
 
 export interface SummaryCard {
   task_title: string;
   total_focus_minutes: number;
-  pomodoro_result: string;
+  study_duration_seconds?: number;
+  study_duration_formatted?: string;
+  planned_focus_minutes?: number;
+  evaluation?: StudyEvaluation;
+  pomodoro_result?: string;
   completed_tasks_count: string;
   completion_rate_percent: number;
   remaining_subtasks: string[];

@@ -1,17 +1,18 @@
 [
   {
-    "task_id": "task_005",
-    "week": 10,
-    "date": "2026-10-18",
+    "task_id": "task_001",
+    "roadmap_id": "rm_INT1306_demo",
+    "week": 11,
+    "date": "2026-10-23",
     "start": "19:30",
     "end": "21:00",
     "course_code": "INT1306",
     "course_name": "Cấu trúc dữ liệu và giải thuật",
-    "title": "Học bù tăng cường: Hoàn thành Bài tập lớn (Chống trễ hạn)",
-    "status": "todo",
+    "title": "Buổi 1: Ôn tập Cây nhị phân & Phép duyệt cây (Đệ quy & Stack)",
+    "status": "done",
     "is_flexible": true,
     "pomodoro_target": 3,
-    "pomodoro_Completed": 0,
+    "pomodoro_Completed": 3,
     "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf",
     "slide_urls": [
       "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf",
@@ -20,529 +21,105 @@
     "subtasks": [
       {
         "sub_id": "sub_1",
-        "content": "Hoàn thành các bài tập còn tồn đọng trong tuần",
-        "done": false
+        "content": "Nắm vững định nghĩa cây nhị phân và cây nhị phân tìm kiếm (BST)",
+        "done": true
       },
       {
         "sub_id": "sub_2",
-        "content": "Ôn tập nhanh Flashcard chuẩn bị cho hạn nộp bài tập lớn",
-        "done": false
-      }
-    ],
-    "personal_notes": "",
-    "gcal_event_id": "gcal_task_task_005_20261018_1930"
-  },
-  {
-    "task_id": "task_006",
-    "week": 11,
-    "date": "2026-10-22",
-    "start": "19:30",
-    "end": "21:30",
-    "course_code": "INT1359",
-    "course_name": "Toán rời rạc 2",
-    "title": "Buổi 1: Nắm vững lý thuyết cốt lõi & Cấu trúc dữ liệu (Toán rời rạc 2) (phần 1/6)",
-    "status": "todo",
-    "is_flexible": true,
-    "pomodoro_target": 4,
-    "pomodoro_Completed": 0,
-    "slide_url": "/static/slides/Ba_i_gia_ng_Toa_n_ro__i_ra_c_2__Pha__n_1.pdf",
-    "slide_urls": [
-      "/static/slides/INT1359_ToanRoiRac2.pdf",
-      "/static/slides/Ba_i_gia_ng_Toa_n_ro__i_ra_c_2__Pha__n_1.pdf"
-    ],
-    "subtasks": [
-      {
-        "sub_id": "sub_1",
-        "content": "Đọc định nghĩa và tính chất cơ bản trong 1 tài liệu PDF (2 trang)",
-        "done": false
+        "content": "Cài đặt thuật toán duyệt In-Order, Pre-Order, Post-Order bằng C++",
+        "done": true
       },
       {
-        "sub_id": "sub_2",
-        "content": "Vẽ sơ đồ minh họa cấu trúc và phân tích độ phức tạp thuật toán",
-        "done": false
+        "sub_id": "sub_3",
+        "content": "Phân tích độ phức tạp thời gian O(n) và không gian O(h) của thuật toán duyệt cây",
+        "done": true
       }
     ],
-    "personal_notes": "",
-    "gcal_event_id": "gcal_task_task_006_20261022_1930"
-  },
-  {
-    "task_id": "task_007",
-    "week": 11,
-    "date": "2026-10-23",
-    "start": "19:30",
-    "end": "21:30",
-    "course_code": "INT1359",
-    "course_name": "Toán rời rạc 2",
-    "title": "Buổi 1: Nắm vững lý thuyết cốt lõi & Cấu trúc dữ liệu (Toán rời rạc 2) (phần 2/6)",
-    "status": "todo",
-    "is_flexible": true,
-    "pomodoro_target": 4,
-    "pomodoro_Completed": 0,
-    "slide_url": "/static/slides/INT1359_ToanRoiRac2.pdf",
-    "slide_urls": [
-      "/static/slides/INT1359_ToanRoiRac2.pdf"
-    ],
-    "subtasks": [
+    "personal_notes": "Đã nắm vững tính chất In-order của BST cho ra dãy số tăng dần. Cần lưu ý trường hợp cây suy biến thành danh sách liên kết.",
+    "gcal_event_id": "gcal_task_001_20261023",
+    "actual_study_seconds": 4200,
+    "actual_study_minutes": 70.0,
+    "planned_study_minutes": 90,
+    "evaluation": {
+      "status": "normal",
+      "category": "Hoàn thành đúng tiến độ",
+      "badge": "✅ Hoàn thành đúng tiến độ",
+      "message": "Bạn đã hoàn thành phiên học với nhịp độ học tập chuẩn xác (70 phút / 90 phút dự kiến). Bạn duy trì được sự tập trung đều đặn và tiếp thu bài bản toàn bộ mục tiêu!",
+      "actual_minutes": 70.0,
+      "actual_seconds": 4200,
+      "planned_minutes": 90,
+      "ratio_percent": 78,
+      "tips": [
+        "Duy trì thói quen học tập đều đặn mỗi ngày",
+        "Đọc lại các ghi chú cá nhân trước khi bước vào buổi học tiếp theo"
+      ]
+    },
+    "chat_history": [
       {
-        "sub_id": "sub_1",
-        "content": "Đọc định nghĩa và tính chất cơ bản trong 1 tài liệu PDF (2 trang)",
-        "done": false
+        "role": "assistant",
+        "content": "Chào bạn! Mình đã đọc xong **2 tài liệu PDF** (tổng cộng **5 trang**, trạng thái: `loaded`) của môn **Cấu trúc dữ liệu và giải thuật**.\n\nHôm nay chúng ta sẽ hoàn thành phiên **\"Buổi 1: Ôn tập Cây nhị phân & Phép duyệt cây (Đệ quy & Stack)\"**. Bạn có thể chuyển đổi qua lại giữa các file PDF ở khung bên trái hoặc hỏi mình bất kỳ câu hỏi lý thuyết / debug code nào nhé!",
+        "provider": "AI trợ giảng"
       },
       {
-        "sub_id": "sub_2",
-        "content": "Vẽ sơ đồ minh họa cấu trúc và phân tích độ phức tạp thuật toán",
-        "done": false
+        "role": "user",
+        "content": "Cho tôi biết cây nhị phân tìm kiếm (BST) có tính chất gì đặc biệt so với cây nhị phân thông thường?"
+      },
+      {
+        "role": "assistant",
+        "content": "Chào bạn! Cây nhị phân tìm kiếm (**Binary Search Tree - BST**) có tính chất đặc trưng rất quan trọng:\n\n1. **Quy tắc thứ tự khóa:**\n   - Với mọi nút `X`, tất cả các nút thuộc cây con bên **trái** của `X` đều có khóa **nhỏ hơn** khóa của `X` (`Key(Left) < Key(X)`).\n   - Tất cả các nút thuộc cây con bên **phải** của `X` đều có khóa **lớn hơn** khóa của `X` (`Key(Right) > Key(X)`).\n   - Cả hai cây con trái và phải của `X` cũng đều phải là cây nhị phân tìm kiếm.\n\n2. **Hệ quả của phép duyệt In-Order:**\n   - Khi bạn thực hiện duyệt cây theo thứ tự giữa (**In-Order Traversal**: Trái -> Gốc -> Phải) trên cây BST, danh sách các khóa thu được sẽ luôn là một **dãy số tăng dần nghiêm ngặt**!\n\n3. **Hiệu năng tìm kiếm:**\n   - Nhờ tính chất trên, chi phí tìm kiếm, chèn, xóa trên cây BST trung bình chỉ mất thời gian **O(log n)** thay vì O(n) như trên danh sách liên kết.",
+        "provider": "AI trợ giảng"
+      },
+      {
+        "role": "user",
+        "content": "Làm thế nào để viết hàm duyệt In-Order bằng đệ quy trong C++?"
+      },
+      {
+        "role": "assistant",
+        "content": "Dưới đây là cài đặt hàm duyệt **In-Order Traversal** bằng đệ quy chuẩn mực trong C++:\n\n```cpp\n#include <iostream>\nusing namespace std;\n\nstruct Node {\n    int data;\n    Node* left;\n    Node* right;\n    Node(int val) : data(val), left(nullptr), right(nullptr) {}\n};\n\n// Hàm duyệt In-Order: Trái -> Gốc -> Phải\nvoid inOrderTraversal(Node* root) {\n    if (root == nullptr) return; // Điều kiện dừng đệ quy\n\n    inOrderTraversal(root->left);  // 1. Duyệt toàn bộ cây con bên trái\n    cout << root->data << \" \";      // 2. Thăm và xử lý nút hiện tại (Gốc)\n    inOrderTraversal(root->right); // 3. Duyệt toàn bộ cây con bên phải\n}\n```\n\n**Giải thích hoạt động:**\n- Thuật toán sẽ đi sâu hết mức có thể về nhánh bên trái nhờ đệ quy.\n- Khi chạm lá (`nullptr`), hàm quay lui và in giá trị của nút cha.\n- Sau đó chuyển tiếp sang nhánh bên phải và lặp lại quá trình tương tự.",
+        "provider": "AI trợ giảng"
+      },
+      {
+        "role": "user",
+        "content": "Độ phức tạp thời gian và không gian của thuật toán này là bao nhiêu?"
+      },
+      {
+        "role": "assistant",
+        "content": "Phân tích độ phức tạp của hàm duyệt In-Order:\n\n- **Độ phức tạp thời gian (Time Complexity):** **O(n)**\n  - Với `n` là tổng số nút trong cây. Vì mỗi nút được thăm và in giá trị đúng **1 lần**.\n\n- **Độ phức tạp không gian (Space Complexity / Call Stack):** **O(h)**\n  - Với `h` là chiều cao của cây nhị phân (tương ứng với số lượng khung ngăn xếp đệ quy tối đa trên Stack):\n    - **Trường hợp tốt nhất / Cây cân bằng (Balanced Tree):** Chiều cao `h ≈ log₂(n)` -> Độ phức tạp bộ nhớ là **O(log n)**.\n    - **Trường hợp xấu nhất (Cây lệch / Skewed Tree):** Cây suy biến thành danh sách liên kết thì `h = n` -> Độ phức tạp bộ nhớ là **O(n)**.",
+        "provider": "AI trợ giảng"
       }
-    ],
-    "personal_notes": "",
-    "gcal_event_id": "gcal_task_task_007_20261023_1930"
+    ]
   },
   {
-    "task_id": "task_008",
+    "task_id": "task_002",
+    "roadmap_id": "rm_INT1306_demo",
     "week": 11,
     "date": "2026-10-24",
     "start": "19:30",
-    "end": "21:30",
-    "course_code": "INT1359",
-    "course_name": "Toán rời rạc 2",
-    "title": "Buổi 1: Nắm vững lý thuyết cốt lõi & Cấu trúc dữ liệu (Toán rời rạc 2) (phần 3/6)",
+    "end": "21:00",
+    "course_code": "INT1306",
+    "course_name": "Cấu trúc dữ liệu và giải thuật",
+    "title": "Buổi 2: Các thao tác nâng cao trên Cây BST & Cân bằng cây AVL",
     "status": "todo",
     "is_flexible": true,
-    "pomodoro_target": 4,
+    "pomodoro_target": 3,
     "pomodoro_Completed": 0,
-    "slide_url": "/static/slides/INT1359_ToanRoiRac2.pdf",
+    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf",
     "slide_urls": [
-      "/static/slides/INT1359_ToanRoiRac2.pdf"
+      "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf"
     ],
     "subtasks": [
       {
         "sub_id": "sub_1",
-        "content": "Đọc định nghĩa và tính chất cơ bản trong 1 tài liệu PDF (2 trang)",
+        "content": "Kỹ thuật xóa nút trên cây nhị phân tìm kiếm BST (3 trường hợp)",
         "done": false
       },
       {
         "sub_id": "sub_2",
-        "content": "Vẽ sơ đồ minh họa cấu trúc và phân tích độ phức tạp thuật toán",
+        "content": "Khái niệm cây cân bằng AVL và 4 phép quay (LL, RR, LR, RL)",
         "done": false
       }
     ],
     "personal_notes": "",
-    "gcal_event_id": "gcal_task_task_008_20261024_1930"
-  },
-  {
-    "task_id": "task_009",
-    "week": 11,
-    "date": "2026-10-25",
-    "start": "19:30",
-    "end": "21:30",
-    "course_code": "INT1359",
-    "course_name": "Toán rời rạc 2",
-    "title": "Buổi 1: Nắm vững lý thuyết cốt lõi & Cấu trúc dữ liệu (Toán rời rạc 2) (phần 4/6)",
-    "status": "todo",
-    "is_flexible": true,
-    "pomodoro_target": 4,
-    "pomodoro_Completed": 0,
-    "slide_url": "/static/slides/INT1359_ToanRoiRac2.pdf",
-    "slide_urls": [
-      "/static/slides/INT1359_ToanRoiRac2.pdf"
-    ],
-    "subtasks": [
-      {
-        "sub_id": "sub_1",
-        "content": "Đọc định nghĩa và tính chất cơ bản trong 1 tài liệu PDF (2 trang)",
-        "done": false
-      },
-      {
-        "sub_id": "sub_2",
-        "content": "Vẽ sơ đồ minh họa cấu trúc và phân tích độ phức tạp thuật toán",
-        "done": false
-      }
-    ],
-    "personal_notes": "",
-    "gcal_event_id": "gcal_task_task_009_20261025_1930"
-  },
-  {
-    "task_id": "task_010",
-    "week": 12,
-    "date": "2026-10-26",
-    "start": "19:30",
-    "end": "21:30",
-    "course_code": "INT1359",
-    "course_name": "Toán rời rạc 2",
-    "title": "Buổi 1: Nắm vững lý thuyết cốt lõi & Cấu trúc dữ liệu (Toán rời rạc 2) (phần 5/6)",
-    "status": "todo",
-    "is_flexible": true,
-    "pomodoro_target": 4,
-    "pomodoro_Completed": 0,
-    "slide_url": "/static/slides/INT1359_ToanRoiRac2.pdf",
-    "slide_urls": [
-      "/static/slides/INT1359_ToanRoiRac2.pdf"
-    ],
-    "subtasks": [
-      {
-        "sub_id": "sub_1",
-        "content": "Đọc định nghĩa và tính chất cơ bản trong 1 tài liệu PDF (2 trang)",
-        "done": false
-      },
-      {
-        "sub_id": "sub_2",
-        "content": "Vẽ sơ đồ minh họa cấu trúc và phân tích độ phức tạp thuật toán",
-        "done": false
-      }
-    ],
-    "personal_notes": "",
-    "gcal_event_id": "gcal_task_task_010_20261026_1930"
-  },
-  {
-    "task_id": "task_011",
-    "week": 12,
-    "date": "2026-10-27",
-    "start": "19:30",
-    "end": "21:30",
-    "course_code": "INT1359",
-    "course_name": "Toán rời rạc 2",
-    "title": "Buổi 1: Nắm vững lý thuyết cốt lõi & Cấu trúc dữ liệu (Toán rời rạc 2) (phần 6/6)",
-    "status": "todo",
-    "is_flexible": true,
-    "pomodoro_target": 4,
-    "pomodoro_Completed": 0,
-    "slide_url": "/static/slides/INT1359_ToanRoiRac2.pdf",
-    "slide_urls": [
-      "/static/slides/INT1359_ToanRoiRac2.pdf"
-    ],
-    "subtasks": [
-      {
-        "sub_id": "sub_1",
-        "content": "Đọc định nghĩa và tính chất cơ bản trong 1 tài liệu PDF (2 trang)",
-        "done": false
-      },
-      {
-        "sub_id": "sub_2",
-        "content": "Vẽ sơ đồ minh họa cấu trúc và phân tích độ phức tạp thuật toán",
-        "done": false
-      }
-    ],
-    "personal_notes": "",
-    "gcal_event_id": "gcal_task_task_011_20261027_1930"
-  },
-  {
-    "task_id": "task_012",
-    "week": 12,
-    "date": "2026-10-28",
-    "start": "19:30",
-    "end": "21:30",
-    "course_code": "INT1359",
-    "course_name": "Toán rời rạc 2",
-    "title": "Buổi 2: Thực hành cài đặt thuật toán & Giải bài tập (Toán rời rạc 2) (phần 1/5)",
-    "status": "todo",
-    "is_flexible": true,
-    "pomodoro_target": 4,
-    "pomodoro_Completed": 0,
-    "slide_url": "/static/slides/INT1359_ToanRoiRac2.pdf",
-    "slide_urls": [
-      "/static/slides/INT1359_ToanRoiRac2.pdf"
-    ],
-    "subtasks": [
-      {
-        "sub_id": "sub_1",
-        "content": "Code thử các thao tác cơ bản (Khởi tạo, Duyệt đệ quy/Stack, Tìm kiếm, Thêm/Xóa)",
-        "done": false
-      },
-      {
-        "sub_id": "sub_2",
-        "content": "Kiểm thử các trường hợp biên (con trỏ NULL, dữ liệu rỗng, phần tử trùng)",
-        "done": false
-      }
-    ],
-    "personal_notes": "",
-    "gcal_event_id": "gcal_task_task_012_20261028_1930"
-  },
-  {
-    "task_id": "task_013",
-    "week": 12,
-    "date": "2026-10-29",
-    "start": "19:30",
-    "end": "21:30",
-    "course_code": "INT1359",
-    "course_name": "Toán rời rạc 2",
-    "title": "Buổi 2: Thực hành cài đặt thuật toán & Giải bài tập (Toán rời rạc 2) (phần 2/5)",
-    "status": "todo",
-    "is_flexible": true,
-    "pomodoro_target": 4,
-    "pomodoro_Completed": 0,
-    "slide_url": "/static/slides/INT1359_ToanRoiRac2.pdf",
-    "slide_urls": [
-      "/static/slides/INT1359_ToanRoiRac2.pdf"
-    ],
-    "subtasks": [
-      {
-        "sub_id": "sub_1",
-        "content": "Code thử các thao tác cơ bản (Khởi tạo, Duyệt đệ quy/Stack, Tìm kiếm, Thêm/Xóa)",
-        "done": false
-      },
-      {
-        "sub_id": "sub_2",
-        "content": "Kiểm thử các trường hợp biên (con trỏ NULL, dữ liệu rỗng, phần tử trùng)",
-        "done": false
-      }
-    ],
-    "personal_notes": "",
-    "gcal_event_id": "gcal_task_task_013_20261029_1930"
-  },
-  {
-    "task_id": "task_014",
-    "week": 12,
-    "date": "2026-10-30",
-    "start": "19:30",
-    "end": "21:30",
-    "course_code": "INT1359",
-    "course_name": "Toán rời rạc 2",
-    "title": "Buổi 2: Thực hành cài đặt thuật toán & Giải bài tập (Toán rời rạc 2) (phần 3/5)",
-    "status": "todo",
-    "is_flexible": true,
-    "pomodoro_target": 4,
-    "pomodoro_Completed": 0,
-    "slide_url": "/static/slides/INT1359_ToanRoiRac2.pdf",
-    "slide_urls": [
-      "/static/slides/INT1359_ToanRoiRac2.pdf"
-    ],
-    "subtasks": [
-      {
-        "sub_id": "sub_1",
-        "content": "Code thử các thao tác cơ bản (Khởi tạo, Duyệt đệ quy/Stack, Tìm kiếm, Thêm/Xóa)",
-        "done": false
-      },
-      {
-        "sub_id": "sub_2",
-        "content": "Kiểm thử các trường hợp biên (con trỏ NULL, dữ liệu rỗng, phần tử trùng)",
-        "done": false
-      }
-    ],
-    "personal_notes": "",
-    "gcal_event_id": "gcal_task_task_014_20261030_1930"
-  },
-  {
-    "task_id": "task_015",
-    "week": 12,
-    "date": "2026-10-31",
-    "start": "19:30",
-    "end": "21:30",
-    "course_code": "INT1359",
-    "course_name": "Toán rời rạc 2",
-    "title": "Buổi 2: Thực hành cài đặt thuật toán & Giải bài tập (Toán rời rạc 2) (phần 4/5)",
-    "status": "todo",
-    "is_flexible": true,
-    "pomodoro_target": 4,
-    "pomodoro_Completed": 0,
-    "slide_url": "/static/slides/INT1359_ToanRoiRac2.pdf",
-    "slide_urls": [
-      "/static/slides/INT1359_ToanRoiRac2.pdf"
-    ],
-    "subtasks": [
-      {
-        "sub_id": "sub_1",
-        "content": "Code thử các thao tác cơ bản (Khởi tạo, Duyệt đệ quy/Stack, Tìm kiếm, Thêm/Xóa)",
-        "done": false
-      },
-      {
-        "sub_id": "sub_2",
-        "content": "Kiểm thử các trường hợp biên (con trỏ NULL, dữ liệu rỗng, phần tử trùng)",
-        "done": false
-      }
-    ],
-    "personal_notes": "",
-    "gcal_event_id": "gcal_task_task_015_20261031_1930"
-  },
-  {
-    "task_id": "task_016",
-    "week": 12,
-    "date": "2026-11-01",
-    "start": "19:30",
-    "end": "21:30",
-    "course_code": "INT1359",
-    "course_name": "Toán rời rạc 2",
-    "title": "Buổi 2: Thực hành cài đặt thuật toán & Giải bài tập (Toán rời rạc 2) (phần 5/5)",
-    "status": "todo",
-    "is_flexible": true,
-    "pomodoro_target": 4,
-    "pomodoro_Completed": 0,
-    "slide_url": "/static/slides/INT1359_ToanRoiRac2.pdf",
-    "slide_urls": [
-      "/static/slides/INT1359_ToanRoiRac2.pdf"
-    ],
-    "subtasks": [
-      {
-        "sub_id": "sub_1",
-        "content": "Code thử các thao tác cơ bản (Khởi tạo, Duyệt đệ quy/Stack, Tìm kiếm, Thêm/Xóa)",
-        "done": false
-      },
-      {
-        "sub_id": "sub_2",
-        "content": "Kiểm thử các trường hợp biên (con trỏ NULL, dữ liệu rỗng, phần tử trùng)",
-        "done": false
-      }
-    ],
-    "personal_notes": "",
-    "gcal_event_id": "gcal_task_task_016_20261101_1930"
-  },
-  {
-    "task_id": "task_017",
-    "week": 13,
-    "date": "2026-11-02",
-    "start": "19:30",
-    "end": "21:30",
-    "course_code": "INT1359",
-    "course_name": "Toán rời rạc 2",
-    "title": "Buổi 3: Tổng ôn & Giải đề tự luyện trước kỳ thi (Toán rời rạc 2) (phần 1/5)",
-    "status": "todo",
-    "is_flexible": true,
-    "pomodoro_target": 4,
-    "pomodoro_Completed": 0,
-    "slide_url": "/static/slides/INT1359_ToanRoiRac2.pdf",
-    "slide_urls": [
-      "/static/slides/INT1359_ToanRoiRac2.pdf"
-    ],
-    "subtasks": [
-      {
-        "sub_id": "sub_1",
-        "content": "Làm bộ câu hỏi Flashcard tổng hợp từ các file PDF đính kèm",
-        "done": false
-      },
-      {
-        "sub_id": "sub_2",
-        "content": "Tự giải hoàn chỉnh 1 bài tập lớn trong 45 phút không xem tài liệu",
-        "done": false
-      }
-    ],
-    "personal_notes": "",
-    "gcal_event_id": "gcal_task_task_017_20261102_1930"
-  },
-  {
-    "task_id": "task_018",
-    "week": 13,
-    "date": "2026-11-03",
-    "start": "19:30",
-    "end": "21:30",
-    "course_code": "INT1359",
-    "course_name": "Toán rời rạc 2",
-    "title": "Buổi 3: Tổng ôn & Giải đề tự luyện trước kỳ thi (Toán rời rạc 2) (phần 2/5)",
-    "status": "todo",
-    "is_flexible": true,
-    "pomodoro_target": 4,
-    "pomodoro_Completed": 0,
-    "slide_url": "/static/slides/INT1359_ToanRoiRac2.pdf",
-    "slide_urls": [
-      "/static/slides/INT1359_ToanRoiRac2.pdf"
-    ],
-    "subtasks": [
-      {
-        "sub_id": "sub_1",
-        "content": "Làm bộ câu hỏi Flashcard tổng hợp từ các file PDF đính kèm",
-        "done": false
-      },
-      {
-        "sub_id": "sub_2",
-        "content": "Tự giải hoàn chỉnh 1 bài tập lớn trong 45 phút không xem tài liệu",
-        "done": false
-      }
-    ],
-    "personal_notes": "",
-    "gcal_event_id": "gcal_task_task_018_20261103_1930"
-  },
-  {
-    "task_id": "task_019",
-    "week": 13,
-    "date": "2026-11-04",
-    "start": "19:30",
-    "end": "21:30",
-    "course_code": "INT1359",
-    "course_name": "Toán rời rạc 2",
-    "title": "Buổi 3: Tổng ôn & Giải đề tự luyện trước kỳ thi (Toán rời rạc 2) (phần 3/5)",
-    "status": "todo",
-    "is_flexible": true,
-    "pomodoro_target": 4,
-    "pomodoro_Completed": 0,
-    "slide_url": "/static/slides/INT1359_ToanRoiRac2.pdf",
-    "slide_urls": [
-      "/static/slides/INT1359_ToanRoiRac2.pdf"
-    ],
-    "subtasks": [
-      {
-        "sub_id": "sub_1",
-        "content": "Làm bộ câu hỏi Flashcard tổng hợp từ các file PDF đính kèm",
-        "done": false
-      },
-      {
-        "sub_id": "sub_2",
-        "content": "Tự giải hoàn chỉnh 1 bài tập lớn trong 45 phút không xem tài liệu",
-        "done": false
-      }
-    ],
-    "personal_notes": "",
-    "gcal_event_id": "gcal_task_task_019_20261104_1930"
-  },
-  {
-    "task_id": "task_020",
-    "week": 13,
-    "date": "2026-11-05",
-    "start": "19:30",
-    "end": "21:30",
-    "course_code": "INT1359",
-    "course_name": "Toán rời rạc 2",
-    "title": "Buổi 3: Tổng ôn & Giải đề tự luyện trước kỳ thi (Toán rời rạc 2) (phần 4/5)",
-    "status": "todo",
-    "is_flexible": true,
-    "pomodoro_target": 4,
-    "pomodoro_Completed": 0,
-    "slide_url": "/static/slides/INT1359_ToanRoiRac2.pdf",
-    "slide_urls": [
-      "/static/slides/INT1359_ToanRoiRac2.pdf"
-    ],
-    "subtasks": [
-      {
-        "sub_id": "sub_1",
-        "content": "Làm bộ câu hỏi Flashcard tổng hợp từ các file PDF đính kèm",
-        "done": false
-      },
-      {
-        "sub_id": "sub_2",
-        "content": "Tự giải hoàn chỉnh 1 bài tập lớn trong 45 phút không xem tài liệu",
-        "done": false
-      }
-    ],
-    "personal_notes": "",
-    "gcal_event_id": "gcal_task_task_020_20261105_1930"
-  },
-  {
-    "task_id": "task_021",
-    "week": 13,
-    "date": "2026-11-06",
-    "start": "19:30",
-    "end": "21:30",
-    "course_code": "INT1359",
-    "course_name": "Toán rời rạc 2",
-    "title": "Buổi 3: Tổng ôn & Giải đề tự luyện trước kỳ thi (Toán rời rạc 2) (phần 5/5)",
-    "status": "todo",
-    "is_flexible": true,
-    "pomodoro_target": 4,
-    "pomodoro_Completed": 0,
-    "slide_url": "/static/slides/INT1359_ToanRoiRac2.pdf",
-    "slide_urls": [
-      "/static/slides/INT1359_ToanRoiRac2.pdf"
-    ],
-    "subtasks": [
-      {
-        "sub_id": "sub_1",
-        "content": "Làm bộ câu hỏi Flashcard tổng hợp từ các file PDF đính kèm",
-        "done": false
-      },
-      {
-        "sub_id": "sub_2",
-        "content": "Tự giải hoàn chỉnh 1 bài tập lớn trong 45 phút không xem tài liệu",
-        "done": false
-      }
-    ],
-    "personal_notes": "",
-    "gcal_event_id": "gcal_task_task_021_20261106_1930"
+    "gcal_event_id": "gcal_task_002_20261024"
   }
 ]

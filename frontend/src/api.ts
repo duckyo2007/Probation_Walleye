@@ -126,6 +126,7 @@ export async function sendTutorChat(payload: {
   user_message: string;
   code_snippet?: string;
   chat_history: Array<{ role: string; content: string }>;
+  images?: string[];
 }): Promise<{ status: string; provider_used: string; reply_markdown: string }> {
   const res = await fetch(`${API_BASE}/api/tutor/chat`, {
     method: 'POST',
@@ -159,11 +160,33 @@ export async function checkTutorInactivity(payload: {
 // API 7: POST /api/workspace/complete
 export async function completeWorkspaceSession(payload: {
   task_id: string;
-  pomodoro_completed: number;
   completed_subtask_ids: string[];
   personal_notes: string;
+  pomodoro_completed?: number;
+  study_duration_seconds?: number;
+  chat_history?: Array<{ role: string; content: string; provider?: string; images?: string[]; isProactive?: boolean }>;
 }): Promise<{ status: string; summary_card: SummaryCard }> {
   const res = await fetch(`${API_BASE}/api/workspace/complete`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      task_id: payload.task_id,
+      completed_subtask_ids: payload.completed_subtask_ids,
+      personal_notes: payload.personal_notes,
+      pomodoro_completed: payload.pomodoro_completed ?? 1,
+      study_duration_seconds: payload.study_duration_seconds,
+      chat_history: payload.chat_history || [],
+    }),
+  });
+  return handleJson(res);
+}
+
+// API: POST /api/workspace/save-chat
+export async function saveWorkspaceChat(payload: {
+  task_id: string;
+  chat_history: Array<{ role: string; content: string; provider?: string; images?: string[]; isProactive?: boolean }>;
+}): Promise<{ status: string; task_id: string; messages_count: number }> {
+  const res = await fetch(`${API_BASE}/api/workspace/save-chat`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),

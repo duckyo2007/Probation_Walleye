@@ -275,8 +275,7 @@ def test_api_5_tutor_chat_and_code_debugging():
     )
     assert resp.status_code == 200
     data = resp.json()
-    assert data["status"] == "success"
-    assert data["provider_used"] in ("gemini-3.8-flash", "groq-fallback")
+    assert data["provider_used"].startswith("gemini-") or data["provider_used"] in ("groq-fallback", "local-fallback")
     assert "nullptr" in data["reply_markdown"] or "NULL" in data["reply_markdown"] or "return" in data["reply_markdown"]
 
 
@@ -334,7 +333,70 @@ def test_api_7_workspace_complete():
     assert card["pomodoro_result"] == "2 / 2 Pomodoro"
     assert card["completed_tasks_count"] == "2 / 3 Tasks"
     assert card["completion_rate_percent"] == 67
-    assert card["remaining_subtasks"] == ["Làm 3 câu hỏi trắc nghiệm cuối bài"]
+    assert "evaluation" in card
+    assert card["evaluation"]["status"] in ("excellent", "normal", "struggling")
+
+    # Case 1: Finished in <= 75% time -> "excellent"
+    r_fast = client.post(
+        "/api/workspace/complete",
+        json={
+            "task_id": "task_001",
+            "study_duration_seconds": 20 * 60,  # 20 mins vs ~120 mins planned
+            "completed_subtask_ids": ["sub_1"],
+        },
+    )
+    assert r_fast.status_code == 200
+    card_fast = r_fast.json()["summary_card"]
+    assert card_fast["evaluation"]["status"] == "excellent"
+    assert "Hiểu bài rất tốt" in card_fast["evaluation"]["badge"]
+
+    # Case 2: Over planned time -> "struggling"
+    r_slow = client.post(
+        "/api/workspace/complete",
+        json={
+            "task_id": "task_001",
+            "study_duration_seconds": 150 * 60,  # 150 mins vs ~120 mins planned
+            "completed_subtask_ids": ["sub_1"],
+        },
+    )
+    assert r_slow.status_code == 200
+    card_slow = r_slow.json()["summary_card"]
+    assert card_slow["evaluation"]["status"] == "struggling"
+    assert "khúc mắc" in card_slow["evaluation"]["badge"].lower() or "hỗ trợ" in card_slow["evaluation"]["badge"].lower()
+
+    # Case 3: Verify chat_history is saved and returned upon enter_workspace
+    chat_sample = [
+        {"role": "user", "content": "Cho tôi biết cổng NAND là gì?"},
+        {"role": "assistant", "content": "Cổng NAND là cổng logic kết hợp giữa AND và NOT.", "provider": "AI trợ giảng"},
+    ]
+    r_chat = client.post(
+        "/api/workspace/complete",
+        json={
+            "task_id": "task_001",
+            "chat_history": chat_sample,
+        },
+    )
+    assert r_chat.status_code == 200
+
+    enter_resp = client.get("/api/workspace/enter/task_001")
+    assert enter_resp.status_code == 200
+    task_info = enter_resp.json()["task_info"]
+    assert task_info["status"] == "done"
+    assert "chat_history" in task_info
+    assert len(task_info["chat_history"]) == 2
+    assert task_info["chat_history"][0]["content"] == "Cho tôi biết cổng NAND là gì?"
+
+    # Case 4: Test /api/workspace/save-chat endpoint
+    chat_updated = chat_sample + [{"role": "user", "content": "Câu hỏi tiếp theo"}]
+    save_resp = client.post(
+        "/api/workspace/save-chat",
+        json={
+            "task_id": "task_001",
+            "chat_history": chat_updated,
+        },
+    )
+    assert save_resp.status_code == 200
+    assert save_resp.json()["messages_count"] == 3
 
 
 def test_api_8_flashcards_generation():

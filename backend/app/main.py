@@ -10,6 +10,7 @@ from app.api.routes import router as api_router
 from app.config import STATIC_DIR
 from app.services.qldt_client import check_and_run_sunday_auto_sync
 from app.services.seed_data import ensure_initial_seed_data
+from app.services.agent_tools import check_gemini_models_health
 
 
 async def _sunday_auto_sync_loop() -> None:

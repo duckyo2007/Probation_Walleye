@@ -17,6 +17,7 @@ from app.schemas.requests import (
     SettingsUpdateRequest,
     TutorChatRequest,
     WorkspaceCompleteRequest,
+    WorkspaceSaveChatRequest,
 )
 from app.services.agent_tools import (
     extract_multi_documents_content,
@@ -46,6 +47,7 @@ from app.services.planner import (
     get_all_roadmaps,
     resolve_conflicts_and_reschedule,
     save_confirmed_roadmap_sessions,
+    save_workspace_chat_history,
 )
 from app.services.qldt_client import (
     fetch_qldt_schedule,
@@ -264,6 +266,7 @@ def tutor_chat_endpoint(request: TutorChatRequest) -> Dict[str, Any]:
         user_message=request.user_message,
         code_snippet=request.code_snippet or "",
         chat_history=history_dicts,
+        images=request.images,
     )
 
 
@@ -288,18 +291,35 @@ def complete_workspace_endpoint(
 ) -> Dict[str, Any]:
     """
     API 7: `POST /api/workspace/complete`
-    Marks subtasks as done, records Pomodoro focus minutes & personal notes, and returns the Summary Card.
+    Marks subtasks as done, records Pomodoro focus minutes & personal notes,
+    saves chat conversation, and returns the Summary Card.
     """
     summary_card = complete_workspace_session(
         task_id=request.task_id,
-        pomodoro_completed=request.pomodoro_completed,
+        pomodoro_completed=request.pomodoro_completed or 1,
         completed_subtask_ids=request.completed_subtask_ids,
         personal_notes=request.personal_notes or "",
+        study_duration_seconds=request.study_duration_seconds,
+        chat_history=request.chat_history,
     )
     return {
         "status": "saved",
         "summary_card": summary_card,
     }
+
+
+@router.post("/workspace/save-chat")
+def save_workspace_chat_endpoint(
+    request: WorkspaceSaveChatRequest,
+) -> Dict[str, Any]:
+    """
+    API: `POST /api/workspace/save-chat`
+    Saves the ongoing chat messages for a workspace task so they can be reviewed anytime.
+    """
+    return save_workspace_chat_history(
+        task_id=request.task_id,
+        chat_history=request.chat_history,
+    )
 
 
 @router.post("/workspace/flashcards")
