@@ -49,7 +49,6 @@ export async function syncSchedule(params?: {
 // API 2: POST /api/schedule/confirm-reschedule (CONFIRMATION GATE)
 export async function confirmReschedule(payload: {
   user_confirmed: boolean;
-  sync_gcal: boolean;
   reschedule_items: Array<{
     task_id: string;
     new_date: string;
@@ -58,7 +57,6 @@ export async function confirmReschedule(payload: {
   }>;
 }): Promise<{
   status: string;
-  gcal_synced: boolean;
   message: string;
   updated_tasks: Array<{ task_id: string; date: string; start: string; end: string; status: string }>;
 }> {

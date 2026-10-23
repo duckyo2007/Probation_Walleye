@@ -148,5 +148,5 @@ server {
 
 1. **Kiểm tra Health Check**: Truy cập `GET /health` $\rightarrow$ Trả về `{"status": "ok", "service": "EasyPlan AI Agent Backend"}`.
 2. **Kiểm tra Đồng bộ QLĐT**: Bấm **🔄 Đồng bộ lịch QLĐT** trên thanh Header $\rightarrow$ Lưới lịch hiển thị đầy đủ các môn học từ `lessons.json` và các phiên tự học từ `tasks.json`.
-3. **Kiểm tra Confirmation Gate**: Bấm **⚠️ Tạo xung đột mẫu** $\rightarrow$ Modal cảnh báo xung đột bật lên $\rightarrow$ Bấm **✓ Đồng ý dời lịch & Đồng bộ Google Calendar** $\rightarrow$ Phiên học được dời sang khung giờ trống thành công.
+3. **Kiểm tra Confirmation Gate**: Bấm **⚠️ Tạo xung đột mẫu** $\rightarrow$ Modal cảnh báo xung đột bật lên $\rightarrow$ Bấm **✓ Đồng ý dời lịch** $\rightarrow$ Phiên học được dời sang khung giờ trống thành công.
 4. **Kiểm tra Phòng học 50/50 & Nhiều File PDF**: Bấm **VÀO TỰ HỌC NGAY →** $\rightarrow$ Kiểm tra chuyển đổi giữa 2 tab PDF mặc định, tải thêm file PDF mới và đặt câu hỏi cho **AI Trợ giảng (`gemini-3.8-flash`)**.

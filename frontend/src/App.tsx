@@ -272,7 +272,6 @@ export function App() {
   // Modals State
   const [showConflictModal, setShowConflictModal] = useState<boolean>(false);
   const [customRescheduleMode, setCustomRescheduleMode] = useState<boolean>(false);
-  const [syncGcalChecked, setSyncGcalChecked] = useState<boolean>(true);
   const [editableConflicts, setEditableConflicts] = useState<
     Record<string, { new_date: string; new_start: string; new_end: string }>
   >({});
@@ -578,7 +577,6 @@ export function App() {
 
       const res = await confirmReschedule({
         user_confirmed: true,
-        sync_gcal: syncGcalChecked,
         reschedule_items: items,
       });
 
@@ -1909,24 +1907,6 @@ export function App() {
                   </div>
                 );
               })}
-
-              <label
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.5rem',
-                  fontSize: '0.84rem',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                }}
-              >
-                <input
-                  type="checkbox"
-                  checked={syncGcalChecked}
-                  onChange={(e) => setSyncGcalChecked(e.target.checked)}
-                />
-                Đồng bộ cập nhật sự kiện lên Google Calendar (gcal_event_id)
-              </label>
             </div>
 
             <div className="modal-footer">
@@ -1941,7 +1921,7 @@ export function App() {
                 onClick={handleConfirmReschedule}
                 disabled={loading}
               >
-                ✓ Đồng ý dời lịch & Đồng bộ Google Calendar
+                ✓ Đồng ý dời lịch
               </button>
             </div>
           </div>

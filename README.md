@@ -95,7 +95,6 @@ flowchart TD
 | **Đọc nhiều file PDF (`PyMuPDF`)** | **REAL** | Sử dụng thư viện `fitz` (`PyMuPDF`) đọc văn bản từ tất cả các file PDF đính kèm trong buổi học, hỗ trợ upload nhiều file `.pdf` từ máy tính. |
 | **AI Trợ giảng & Tạo Lộ trình** | **REAL** | Gọi **Google Gemini (`gemini-3.8-flash`)** qua SDK `google-genai` (`client.interactions.create`), tự động fallback sang **Groq API (`llama-3.3-70b-versatile`)**. |
 | **Dự báo Nguy cơ Trễ hạn (Delay Risk)** | **REAL + HEURISTIC** | Tự động phát hiện các buổi tự học bị lỡ (đã qua ngày chưa hoàn thành), gắn nhãn `⏰ Chậm tiến độ` và đề xuất khung giờ học bù tối ưu không trùng lịch trường. |
-| **Đồng bộ Google Calendar (`gcal_event_id`)** | **MOCK / ID** | Sinh và cập nhật mã định danh sự kiện `gcal_event_id` chuẩn hóa trong `lessons.json` và `tasks.json`. |
 
 ---
 
@@ -113,7 +112,7 @@ flowchart TD
    - **Modal Quản lý Lộ trình Học tập**: Cho phép xem danh sách tất cả các lộ trình môn học đã tạo, thống kê số buổi hoàn thành/sắp tới/chậm tiến độ, chọn từng lộ trình hoặc "Chọn tất cả" và thực hiện xóa an toàn khỏi thời khóa biểu.
 2. **Màn hình 02 — Conflict Resolution Modal (Confirmation Gate)**:
    - Tự động bật lên khi phát hiện lịch học trên trường đè lên lịch tự học cá nhân.
-   - Đặt cạnh nhau **Lịch cố định QLĐT** và **Phiên tự học bị trùng**, hiển thị khung giờ trống gợi ý của Agent, cho phép người dùng tự chỉnh lại giờ hoặc bấm `[Đồng ý dời lịch & Đồng bộ Google Calendar]`.
+   - Đặt cạnh nhau **Lịch cố định QLĐT** và **Phiên tự học bị trùng**, hiển thị khung giờ trống gợi ý của Agent, cho phép người dùng tự chỉnh lại giờ hoặc bấm `[Đồng ý dời lịch]`.
 3. **Màn hình 03 — Split-Screen 50/50 Deep Working Workspace**:
    - **Nửa trái (50%)**: Thanh tab chuyển đổi giữa **nhiều tài liệu PDF** trong cùng buổi học (`1. INT1306_Chuong3_CayNhiPhan.pdf`, `2. INT1306_BaiTap_ThucHanh_CayNhiPhan.pdf`, ...), nút `+ Thêm PDF` (hỗ trợ chọn nhiều file cùng lúc), trình xem PDF trực tiếp và tab xem văn bản trích xuất `<DOCUMENT_DATA>`.
    - **Nửa phải (50%)**: Đồng hồ **Pomodoro 25:00**, **Checklist mục tiêu (`subtasks`)**, ô ghi chú cá nhân, **AI Trợ giảng** (hỗ trợ hiển thị Markdown, khung dán Code Debug, nút test 10 phút không thao tác), và tab **Flashcard Ôn tập**.
@@ -140,7 +139,7 @@ flowchart TD
 | STT | Method & Endpoint | Chức năng chính | Confirmation Gate |
 | :-: | :--- | :--- | :---: |
 | **1** | `POST /api/schedule/sync` | Đồng bộ lịch QLĐT PTIT, gộp tiết & kiểm tra xung đột (Read-only). | Không (Read-only) |
-| **2** | `POST /api/schedule/confirm-reschedule` | Thực thi dời lịch tự học & cập nhật `gcal_event_id`. | **Có (`HTTP 403`)** |
+| **2** | `POST /api/schedule/confirm-reschedule` | Thực thi dời lịch tự học sang khung giờ trống. | **Có (`HTTP 403`)** |
 | **3** | `POST /api/roadmap/generate` | Đọc nhiều file PDF & sinh lộ trình tự học nháp vào các khe giờ trống. | Không (Draft) |
 | **3.1** | `POST /api/roadmap/confirm-save` | Lưu các phiên học từ lộ trình nháp vào `tasks.json`. | **Có (`HTTP 403`)** |
 | **4** | `GET /api/workspace/enter/{task_id}` | Mở phòng học 50/50 & trích xuất văn bản từ toàn bộ PDF của buổi học. | Không (Read-only) |

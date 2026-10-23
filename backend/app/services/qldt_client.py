@@ -239,7 +239,6 @@ def parse_qldt_payload_to_lessons(raw_payload: Dict[str, Any]) -> List[Dict[str,
             c_code = g["course_code"]
             d_str = g["date"]
             start_compact = start_time.replace(":", "")
-            date_compact = d_str.replace("-", "")
 
             lesson_obj = {
                 "key": f"{c_code}_{d_str}_{start_compact}",
@@ -255,7 +254,6 @@ def parse_qldt_payload_to_lessons(raw_payload: Dict[str, Any]) -> List[Dict[str,
                 "cancelled": g["cancelled"],
                 "makeup": g["makeup"],
                 "slide_url": get_slide_for_course(c_code),
-                "gcal_event_id": f"gcal_evt_{c_code}_{date_compact}_{start_compact}",
             }
             merged_lessons.append(lesson_obj)
 

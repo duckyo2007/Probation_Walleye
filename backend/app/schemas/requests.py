@@ -19,7 +19,6 @@ class RescheduleItem(BaseModel):
 class ConfirmRescheduleRequest(BaseModel):
     # Kept as Any so non-bool truthy values like "true" or 1 are caught by the 403 Confirmation Gate
     user_confirmed: Any = None
-    sync_gcal: bool = True
     reschedule_items: List[RescheduleItem] = Field(default_factory=list)
 
 

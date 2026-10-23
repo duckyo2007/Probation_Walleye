@@ -12,7 +12,6 @@ export interface Lesson {
   cancelled: boolean;
   makeup: boolean;
   slide_url: string;
-  gcal_event_id: string;
 }
 
 export interface Subtask {
@@ -38,7 +37,6 @@ export interface StudyTask {
   slide_urls?: string[];
   subtasks: Subtask[];
   personal_notes: string;
-  gcal_event_id: string;
   overdue?: boolean;
   roadmap_id?: string;
   actual_study_seconds?: number;

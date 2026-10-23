@@ -130,12 +130,10 @@ def confirm_reschedule_endpoint(
     items_dicts = [item.model_dump() for item in request.reschedule_items]
     updated_tasks = apply_reschedule(
         reschedule_items=items_dicts,
-        sync_gcal=request.sync_gcal,
     )
     return {
         "status": "updated",
-        "gcal_synced": bool(request.sync_gcal),
-        "message": f"Đã dời {len(updated_tasks)} phiên tự học và cập nhật Google Calendar thành công.",
+        "message": f"Đã dời {len(updated_tasks)} phiên tự học thành công.",
         "updated_tasks": updated_tasks,
     }
 
@@ -524,7 +522,6 @@ def simulate_conflict_endpoint() -> Dict[str, Any]:
                 "cancelled": False,
                 "makeup": True,
                 "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf",
-                "gcal_event_id": "gcal_evt_INT1306_20261015_0700",
             }
         )
         save_lessons(lessons)

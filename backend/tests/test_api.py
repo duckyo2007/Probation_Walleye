@@ -91,7 +91,6 @@ def test_api_2_confirm_reschedule_rejects_unconfirmed_with_403(invalid_confirm_v
     tasks_before = load_tasks()
     payload = {
         "user_confirmed": invalid_confirm_value,
-        "sync_gcal": True,
         "reschedule_items": [
             {
                 "task_id": "task_001",
@@ -112,7 +111,6 @@ def test_api_2_confirm_reschedule_success_and_edge_errors():
     # Valid confirmation
     payload = {
         "user_confirmed": True,
-        "sync_gcal": True,
         "reschedule_items": [
             {
                 "task_id": "task_001",
@@ -126,7 +124,6 @@ def test_api_2_confirm_reschedule_success_and_edge_errors():
     assert resp.status_code == 200
     data = resp.json()
     assert data["status"] == "updated"
-    assert data["gcal_synced"] is True
     assert data["updated_tasks"][0]["start"] == "19:30"
     assert data["updated_tasks"][0]["end"] == "21:00"
 
@@ -135,7 +132,6 @@ def test_api_2_confirm_reschedule_success_and_edge_errors():
         "/api/schedule/confirm-reschedule",
         json={
             "user_confirmed": True,
-            "sync_gcal": True,
             "reschedule_items": [
                 {
                     "task_id": "task_999_nonexistent",
@@ -154,7 +150,6 @@ def test_api_2_confirm_reschedule_success_and_edge_errors():
         "/api/schedule/confirm-reschedule",
         json={
             "user_confirmed": True,
-            "sync_gcal": True,
             "reschedule_items": [
                 {
                     "task_id": "task_001",

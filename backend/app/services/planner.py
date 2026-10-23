@@ -269,10 +269,9 @@ def compute_delay_prediction(
 
 def apply_reschedule(
     reschedule_items: List[Dict[str, Any]],
-    sync_gcal: bool = True,
 ) -> List[Dict[str, Any]]:
     """
-    Applies user-confirmed rescheduling items to `tasks.json` and updates Google Calendar IDs.
+    Applies user-confirmed rescheduling items to `tasks.json`.
     """
     if not reschedule_items:
         raise HTTPException(
@@ -310,10 +309,6 @@ def apply_reschedule(
         target["date"] = item["new_date"].strip()
         target["start"] = item["new_start"].strip()
         target["end"] = item["new_end"].strip()
-        if sync_gcal:
-            compact_date = target["date"].replace("-", "")
-            compact_start = target["start"].replace(":", "")
-            target["gcal_event_id"] = f"gcal_task_{tid}_{compact_date}_{compact_start}"
         updated_summary.append(
             {
                 "task_id": tid,
@@ -321,7 +316,6 @@ def apply_reschedule(
                 "start": target["start"],
                 "end": target["end"],
                 "status": target.get("status", "todo"),
-                "gcal_event_id": target.get("gcal_event_id"),
             }
         )
 
@@ -583,8 +577,6 @@ def save_confirmed_roadmap_sessions(
                 {"sub_id": "sub_2", "content": "Làm bài tập vận dụng & ghi chú câu hỏi", "done": False},
             ]
 
-        compact_date = s_date.replace("-", "")
-        compact_start = s_start.replace(":", "")
         primary_slide = str(
             session.get("slide_url")
             or (slide_urls[0] if slide_urls else None)
@@ -618,7 +610,6 @@ def save_confirmed_roadmap_sessions(
             "slide_urls": clean_slide_urls,
             "subtasks": subtasks,
             "personal_notes": "",
-            "gcal_event_id": f"gcal_task_{new_tid}_{compact_date}_{compact_start}",
         }
         tasks.append(task_obj)
         added_ids.append(new_tid)

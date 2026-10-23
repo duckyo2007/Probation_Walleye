@@ -275,7 +275,6 @@ def build_default_lessons() -> List[Dict[str, Any]]:
                 "cancelled": False,
                 "makeup": True,
                 "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf",
-                "gcal_event_id": "gcal_evt_INT1306_20261015_0700",
             }
         )
 
@@ -325,7 +324,6 @@ def build_default_tasks() -> List[Dict[str, Any]]:
                 },
             ],
             "personal_notes": "",
-            "gcal_event_id": "gcal_task_001",
         },
         {
             "task_id": "task_002",
@@ -362,7 +360,6 @@ def build_default_tasks() -> List[Dict[str, Any]]:
                 },
             ],
             "personal_notes": "",
-            "gcal_event_id": "gcal_task_002",
         },
         {
             "task_id": "task_003",
@@ -394,7 +391,6 @@ def build_default_tasks() -> List[Dict[str, Any]]:
                 },
             ],
             "personal_notes": "",
-            "gcal_event_id": "gcal_task_003",
         },
         {
             "task_id": "task_004",
@@ -426,7 +422,6 @@ def build_default_tasks() -> List[Dict[str, Any]]:
                 },
             ],
             "personal_notes": "Đã làm chắc dạng bài công thức Bayes.",
-            "gcal_event_id": "gcal_task_004",
         },
     ]
 

@@ -12,8 +12,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/INT1359_ToanRoiRac2.pdf",
-    "gcal_event_id": "gcal_evt_INT1359_20260813_1000"
+    "slide_url": "/static/slides/INT1359_ToanRoiRac2.pdf"
   },
   {
     "key": "ELE1309_2026-08-14_1300",
@@ -28,8 +27,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/ELE1309_DienTuSo.pdf",
-    "gcal_event_id": "gcal_evt_ELE1309_20260814_1300"
+    "slide_url": "/static/slides/ELE1309_DienTuSo.pdf"
   },
   {
     "key": "BAS1269_2026-08-14_1600",
@@ -44,8 +42,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1269_XacSuatThongKe.pdf",
-    "gcal_event_id": "gcal_evt_BAS1269_20260814_1600"
+    "slide_url": "/static/slides/BAS1269_XacSuatThongKe.pdf"
   },
   {
     "key": "INT1306_2026-08-15_1300",
@@ -60,8 +57,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf",
-    "gcal_event_id": "gcal_evt_INT1306_20260815_1300"
+    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf"
   },
   {
     "key": "BSA12117_2026-08-15_1600",
@@ -76,8 +72,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf",
-    "gcal_event_id": "gcal_evt_BSA12117_20260815_1600"
+    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf"
   },
   {
     "key": "INT1359_2026-08-20_1000",
@@ -92,8 +87,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/INT1359_ToanRoiRac2.pdf",
-    "gcal_event_id": "gcal_evt_INT1359_20260820_1000"
+    "slide_url": "/static/slides/INT1359_ToanRoiRac2.pdf"
   },
   {
     "key": "BAS1158_2026-08-21_0800",
@@ -108,8 +102,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf",
-    "gcal_event_id": "gcal_evt_BAS1158_20260821_0800"
+    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf"
   },
   {
     "key": "ELE1309_2026-08-21_1300",
@@ -124,8 +117,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/ELE1309_DienTuSo.pdf",
-    "gcal_event_id": "gcal_evt_ELE1309_20260821_1300"
+    "slide_url": "/static/slides/ELE1309_DienTuSo.pdf"
   },
   {
     "key": "BAS1269_2026-08-21_1600",
@@ -140,8 +132,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1269_XacSuatThongKe.pdf",
-    "gcal_event_id": "gcal_evt_BAS1269_20260821_1600"
+    "slide_url": "/static/slides/BAS1269_XacSuatThongKe.pdf"
   },
   {
     "key": "BAS1158_2026-08-22_0800",
@@ -156,8 +147,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf",
-    "gcal_event_id": "gcal_evt_BAS1158_20260822_0800"
+    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf"
   },
   {
     "key": "INT1306_2026-08-22_1300",
@@ -172,8 +162,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf",
-    "gcal_event_id": "gcal_evt_INT1306_20260822_1300"
+    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf"
   },
   {
     "key": "BSA12117_2026-08-22_1600",
@@ -188,8 +177,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf",
-    "gcal_event_id": "gcal_evt_BSA12117_20260822_1600"
+    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf"
   },
   {
     "key": "INT1359_2026-08-27_1000",
@@ -204,8 +192,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/INT1359_ToanRoiRac2.pdf",
-    "gcal_event_id": "gcal_evt_INT1359_20260827_1000"
+    "slide_url": "/static/slides/INT1359_ToanRoiRac2.pdf"
   },
   {
     "key": "BAS1158_2026-08-28_0800",
@@ -220,8 +207,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf",
-    "gcal_event_id": "gcal_evt_BAS1158_20260828_0800"
+    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf"
   },
   {
     "key": "ELE1309_2026-08-28_1300",
@@ -236,8 +222,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/ELE1309_DienTuSo.pdf",
-    "gcal_event_id": "gcal_evt_ELE1309_20260828_1300"
+    "slide_url": "/static/slides/ELE1309_DienTuSo.pdf"
   },
   {
     "key": "BAS1269_2026-08-28_1600",
@@ -252,8 +237,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1269_XacSuatThongKe.pdf",
-    "gcal_event_id": "gcal_evt_BAS1269_20260828_1600"
+    "slide_url": "/static/slides/BAS1269_XacSuatThongKe.pdf"
   },
   {
     "key": "INT1359_2026-09-03_1000",
@@ -268,8 +252,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/INT1359_ToanRoiRac2.pdf",
-    "gcal_event_id": "gcal_evt_INT1359_20260903_1000"
+    "slide_url": "/static/slides/INT1359_ToanRoiRac2.pdf"
   },
   {
     "key": "BAS1158_2026-09-04_0800",
@@ -284,8 +267,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf",
-    "gcal_event_id": "gcal_evt_BAS1158_20260904_0800"
+    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf"
   },
   {
     "key": "ELE1309_2026-09-04_1300",
@@ -300,8 +282,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/ELE1309_DienTuSo.pdf",
-    "gcal_event_id": "gcal_evt_ELE1309_20260904_1300"
+    "slide_url": "/static/slides/ELE1309_DienTuSo.pdf"
   },
   {
     "key": "BAS1269_2026-09-04_1600",
@@ -316,8 +297,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1269_XacSuatThongKe.pdf",
-    "gcal_event_id": "gcal_evt_BAS1269_20260904_1600"
+    "slide_url": "/static/slides/BAS1269_XacSuatThongKe.pdf"
   },
   {
     "key": "BAS1158_2026-09-05_0800",
@@ -332,8 +312,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf",
-    "gcal_event_id": "gcal_evt_BAS1158_20260905_0800"
+    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf"
   },
   {
     "key": "INT1306_2026-09-05_1300",
@@ -348,8 +327,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf",
-    "gcal_event_id": "gcal_evt_INT1306_20260905_1300"
+    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf"
   },
   {
     "key": "BSA12117_2026-09-05_1600",
@@ -364,8 +342,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf",
-    "gcal_event_id": "gcal_evt_BSA12117_20260905_1600"
+    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf"
   },
   {
     "key": "BSA12117_2026-09-05_2100",
@@ -380,8 +357,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf",
-    "gcal_event_id": "gcal_evt_BSA12117_20260905_2100"
+    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf"
   },
   {
     "key": "INT1359_2026-09-10_0900",
@@ -396,8 +372,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/INT1359_ToanRoiRac2.pdf",
-    "gcal_event_id": "gcal_evt_INT1359_20260910_0900"
+    "slide_url": "/static/slides/INT1359_ToanRoiRac2.pdf"
   },
   {
     "key": "BAS1158_2026-09-11_0700",
@@ -412,8 +387,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf",
-    "gcal_event_id": "gcal_evt_BAS1158_20260911_0700"
+    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf"
   },
   {
     "key": "ELE1309_2026-09-11_1300",
@@ -428,8 +402,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/ELE1309_DienTuSo.pdf",
-    "gcal_event_id": "gcal_evt_ELE1309_20260911_1300"
+    "slide_url": "/static/slides/ELE1309_DienTuSo.pdf"
   },
   {
     "key": "BAS1269_2026-09-11_1600",
@@ -444,8 +417,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1269_XacSuatThongKe.pdf",
-    "gcal_event_id": "gcal_evt_BAS1269_20260911_1600"
+    "slide_url": "/static/slides/BAS1269_XacSuatThongKe.pdf"
   },
   {
     "key": "BAS1158_2026-09-12_0800",
@@ -460,8 +432,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf",
-    "gcal_event_id": "gcal_evt_BAS1158_20260912_0800"
+    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf"
   },
   {
     "key": "INT1306_2026-09-12_1300",
@@ -476,8 +447,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf",
-    "gcal_event_id": "gcal_evt_INT1306_20260912_1300"
+    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf"
   },
   {
     "key": "BSA12117_2026-09-12_1600",
@@ -492,8 +462,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf",
-    "gcal_event_id": "gcal_evt_BSA12117_20260912_1600"
+    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf"
   },
   {
     "key": "SKD1101_2026-09-17_0700",
@@ -508,8 +477,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/SKD1101_KyNangThuyetTrinh.pdf",
-    "gcal_event_id": "gcal_evt_SKD1101_20260917_0700"
+    "slide_url": "/static/slides/SKD1101_KyNangThuyetTrinh.pdf"
   },
   {
     "key": "INT1359_2026-09-17_0900",
@@ -524,8 +492,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/INT1359_ToanRoiRac2.pdf",
-    "gcal_event_id": "gcal_evt_INT1359_20260917_0900"
+    "slide_url": "/static/slides/INT1359_ToanRoiRac2.pdf"
   },
   {
     "key": "BAS1158_2026-09-18_0700",
@@ -540,8 +507,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf",
-    "gcal_event_id": "gcal_evt_BAS1158_20260918_0700"
+    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf"
   },
   {
     "key": "ELE1309_2026-09-18_1300",
@@ -556,8 +522,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/ELE1309_DienTuSo.pdf",
-    "gcal_event_id": "gcal_evt_ELE1309_20260918_1300"
+    "slide_url": "/static/slides/ELE1309_DienTuSo.pdf"
   },
   {
     "key": "BAS1269_2026-09-18_1600",
@@ -572,8 +537,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1269_XacSuatThongKe.pdf",
-    "gcal_event_id": "gcal_evt_BAS1269_20260918_1600"
+    "slide_url": "/static/slides/BAS1269_XacSuatThongKe.pdf"
   },
   {
     "key": "BAS1158_2026-09-19_0700",
@@ -588,8 +552,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf",
-    "gcal_event_id": "gcal_evt_BAS1158_20260919_0700"
+    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf"
   },
   {
     "key": "INT1306_2026-09-19_1300",
@@ -604,8 +567,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf",
-    "gcal_event_id": "gcal_evt_INT1306_20260919_1300"
+    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf"
   },
   {
     "key": "BSA12117_2026-09-19_1600",
@@ -620,8 +582,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf",
-    "gcal_event_id": "gcal_evt_BSA12117_20260919_1600"
+    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf"
   },
   {
     "key": "BSA12117_2026-09-19_2100",
@@ -636,8 +597,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf",
-    "gcal_event_id": "gcal_evt_BSA12117_20260919_2100"
+    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf"
   },
   {
     "key": "ELE1309_2026-09-20_0800",
@@ -652,8 +612,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/ELE1309_DienTuSo.pdf",
-    "gcal_event_id": "gcal_evt_ELE1309_20260920_0800"
+    "slide_url": "/static/slides/ELE1309_DienTuSo.pdf"
   },
   {
     "key": "INT1306_2026-09-20_0800",
@@ -668,8 +627,7 @@
     "online": true,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf",
-    "gcal_event_id": "gcal_evt_INT1306_20260920_0800"
+    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf"
   },
   {
     "key": "SKD1101_2026-09-24_0700",
@@ -684,8 +642,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/SKD1101_KyNangThuyetTrinh.pdf",
-    "gcal_event_id": "gcal_evt_SKD1101_20260924_0700"
+    "slide_url": "/static/slides/SKD1101_KyNangThuyetTrinh.pdf"
   },
   {
     "key": "INT1359_2026-09-24_0900",
@@ -700,8 +657,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/INT1359_ToanRoiRac2.pdf",
-    "gcal_event_id": "gcal_evt_INT1359_20260924_0900"
+    "slide_url": "/static/slides/INT1359_ToanRoiRac2.pdf"
   },
   {
     "key": "BAS1158_2026-09-25_0700",
@@ -716,8 +672,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf",
-    "gcal_event_id": "gcal_evt_BAS1158_20260925_0700"
+    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf"
   },
   {
     "key": "ELE1309_2026-09-25_1300",
@@ -732,8 +687,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/ELE1309_DienTuSo.pdf",
-    "gcal_event_id": "gcal_evt_ELE1309_20260925_1300"
+    "slide_url": "/static/slides/ELE1309_DienTuSo.pdf"
   },
   {
     "key": "BAS1269_2026-09-25_1600",
@@ -748,8 +702,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1269_XacSuatThongKe.pdf",
-    "gcal_event_id": "gcal_evt_BAS1269_20260925_1600"
+    "slide_url": "/static/slides/BAS1269_XacSuatThongKe.pdf"
   },
   {
     "key": "BAS1158_2026-09-26_0700",
@@ -764,8 +717,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf",
-    "gcal_event_id": "gcal_evt_BAS1158_20260926_0700"
+    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf"
   },
   {
     "key": "INT1306_2026-09-26_1300",
@@ -780,8 +732,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf",
-    "gcal_event_id": "gcal_evt_INT1306_20260926_1300"
+    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf"
   },
   {
     "key": "BSA12117_2026-09-26_1600",
@@ -796,8 +747,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf",
-    "gcal_event_id": "gcal_evt_BSA12117_20260926_1600"
+    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf"
   },
   {
     "key": "SKD1101_2026-10-01_0700",
@@ -812,8 +762,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/SKD1101_KyNangThuyetTrinh.pdf",
-    "gcal_event_id": "gcal_evt_SKD1101_20261001_0700"
+    "slide_url": "/static/slides/SKD1101_KyNangThuyetTrinh.pdf"
   },
   {
     "key": "INT1359_2026-10-01_0900",
@@ -828,8 +777,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/INT1359_ToanRoiRac2.pdf",
-    "gcal_event_id": "gcal_evt_INT1359_20261001_0900"
+    "slide_url": "/static/slides/INT1359_ToanRoiRac2.pdf"
   },
   {
     "key": "SKD1101_2026-10-01_1900",
@@ -844,8 +792,7 @@
     "online": true,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/SKD1101_KyNangThuyetTrinh.pdf",
-    "gcal_event_id": "gcal_evt_SKD1101_20261001_1900"
+    "slide_url": "/static/slides/SKD1101_KyNangThuyetTrinh.pdf"
   },
   {
     "key": "BAS1158_2026-10-02_0700",
@@ -860,8 +807,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf",
-    "gcal_event_id": "gcal_evt_BAS1158_20261002_0700"
+    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf"
   },
   {
     "key": "ELE1309_2026-10-02_1300",
@@ -876,8 +822,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/ELE1309_DienTuSo.pdf",
-    "gcal_event_id": "gcal_evt_ELE1309_20261002_1300"
+    "slide_url": "/static/slides/ELE1309_DienTuSo.pdf"
   },
   {
     "key": "BAS1269_2026-10-02_1600",
@@ -892,8 +837,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1269_XacSuatThongKe.pdf",
-    "gcal_event_id": "gcal_evt_BAS1269_20261002_1600"
+    "slide_url": "/static/slides/BAS1269_XacSuatThongKe.pdf"
   },
   {
     "key": "BAS1158_2026-10-03_0700",
@@ -908,8 +852,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf",
-    "gcal_event_id": "gcal_evt_BAS1158_20261003_0700"
+    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf"
   },
   {
     "key": "INT1306_2026-10-03_1300",
@@ -924,8 +867,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf",
-    "gcal_event_id": "gcal_evt_INT1306_20261003_1300"
+    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf"
   },
   {
     "key": "BSA12117_2026-10-03_1600",
@@ -940,8 +882,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf",
-    "gcal_event_id": "gcal_evt_BSA12117_20261003_1600"
+    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf"
   },
   {
     "key": "BSA12117_2026-10-03_2100",
@@ -956,8 +897,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf",
-    "gcal_event_id": "gcal_evt_BSA12117_20261003_2100"
+    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf"
   },
   {
     "key": "ELE1309_2026-10-04_0800",
@@ -972,8 +912,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/ELE1309_DienTuSo.pdf",
-    "gcal_event_id": "gcal_evt_ELE1309_20261004_0800"
+    "slide_url": "/static/slides/ELE1309_DienTuSo.pdf"
   },
   {
     "key": "SKD1101_2026-10-08_0700",
@@ -988,8 +927,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/SKD1101_KyNangThuyetTrinh.pdf",
-    "gcal_event_id": "gcal_evt_SKD1101_20261008_0700"
+    "slide_url": "/static/slides/SKD1101_KyNangThuyetTrinh.pdf"
   },
   {
     "key": "INT1359_2026-10-08_0900",
@@ -1004,8 +942,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/INT1359_ToanRoiRac2.pdf",
-    "gcal_event_id": "gcal_evt_INT1359_20261008_0900"
+    "slide_url": "/static/slides/INT1359_ToanRoiRac2.pdf"
   },
   {
     "key": "BAS1152_2026-10-08_1300",
@@ -1020,8 +957,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1152_CNXHKH.pdf",
-    "gcal_event_id": "gcal_evt_BAS1152_20261008_1300"
+    "slide_url": "/static/slides/BAS1152_CNXHKH.pdf"
   },
   {
     "key": "INT1359_2026-10-08_1900",
@@ -1036,8 +972,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/INT1359_ToanRoiRac2.pdf",
-    "gcal_event_id": "gcal_evt_INT1359_20261008_1900"
+    "slide_url": "/static/slides/INT1359_ToanRoiRac2.pdf"
   },
   {
     "key": "BAS1152_2026-10-08_2212",
@@ -1052,8 +987,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1152_CNXHKH.pdf",
-    "gcal_event_id": "gcal_evt_BAS1152_20261008_2212"
+    "slide_url": "/static/slides/BAS1152_CNXHKH.pdf"
   },
   {
     "key": "BAS1158_2026-10-09_0700",
@@ -1068,8 +1002,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf",
-    "gcal_event_id": "gcal_evt_BAS1158_20261009_0700"
+    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf"
   },
   {
     "key": "ELE1309_2026-10-09_1300",
@@ -1084,8 +1017,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/ELE1309_DienTuSo.pdf",
-    "gcal_event_id": "gcal_evt_ELE1309_20261009_1300"
+    "slide_url": "/static/slides/ELE1309_DienTuSo.pdf"
   },
   {
     "key": "BAS1269_2026-10-09_1600",
@@ -1100,8 +1032,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1269_XacSuatThongKe.pdf",
-    "gcal_event_id": "gcal_evt_BAS1269_20261009_1600"
+    "slide_url": "/static/slides/BAS1269_XacSuatThongKe.pdf"
   },
   {
     "key": "BAS1152_2026-10-09_2212",
@@ -1116,8 +1047,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1152_CNXHKH.pdf",
-    "gcal_event_id": "gcal_evt_BAS1152_20261009_2212"
+    "slide_url": "/static/slides/BAS1152_CNXHKH.pdf"
   },
   {
     "key": "BAS1158_2026-10-10_0700",
@@ -1132,8 +1062,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf",
-    "gcal_event_id": "gcal_evt_BAS1158_20261010_0700"
+    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf"
   },
   {
     "key": "INT1306_2026-10-10_1300",
@@ -1148,8 +1077,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf",
-    "gcal_event_id": "gcal_evt_INT1306_20261010_1300"
+    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf"
   },
   {
     "key": "INT1306_2026-10-11_0800",
@@ -1164,8 +1092,7 @@
     "online": true,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf",
-    "gcal_event_id": "gcal_evt_INT1306_20261011_0800"
+    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf"
   },
   {
     "key": "INT1306_2026-10-15_0700",
@@ -1180,8 +1107,7 @@
     "online": false,
     "cancelled": false,
     "makeup": true,
-    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf",
-    "gcal_event_id": "gcal_evt_INT1306_20261015_0700"
+    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf"
   },
   {
     "key": "SKD1101_2026-10-15_0700",
@@ -1196,8 +1122,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/SKD1101_KyNangThuyetTrinh.pdf",
-    "gcal_event_id": "gcal_evt_SKD1101_20261015_0700"
+    "slide_url": "/static/slides/SKD1101_KyNangThuyetTrinh.pdf"
   },
   {
     "key": "INT1359_2026-10-15_0900",
@@ -1212,8 +1137,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/INT1359_ToanRoiRac2.pdf",
-    "gcal_event_id": "gcal_evt_INT1359_20261015_0900"
+    "slide_url": "/static/slides/INT1359_ToanRoiRac2.pdf"
   },
   {
     "key": "BAS1152_2026-10-15_1300",
@@ -1228,8 +1152,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1152_CNXHKH.pdf",
-    "gcal_event_id": "gcal_evt_BAS1152_20261015_1300"
+    "slide_url": "/static/slides/BAS1152_CNXHKH.pdf"
   },
   {
     "key": "INT1359_2026-10-15_1900",
@@ -1244,8 +1167,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/INT1359_ToanRoiRac2.pdf",
-    "gcal_event_id": "gcal_evt_INT1359_20261015_1900"
+    "slide_url": "/static/slides/INT1359_ToanRoiRac2.pdf"
   },
   {
     "key": "SKD1101_2026-10-15_1900",
@@ -1260,8 +1182,7 @@
     "online": true,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/SKD1101_KyNangThuyetTrinh.pdf",
-    "gcal_event_id": "gcal_evt_SKD1101_20261015_1900"
+    "slide_url": "/static/slides/SKD1101_KyNangThuyetTrinh.pdf"
   },
   {
     "key": "BAS1158_2026-10-16_0700",
@@ -1276,8 +1197,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf",
-    "gcal_event_id": "gcal_evt_BAS1158_20261016_0700"
+    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf"
   },
   {
     "key": "ELE1309_2026-10-16_1300",
@@ -1292,8 +1212,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/ELE1309_DienTuSo.pdf",
-    "gcal_event_id": "gcal_evt_ELE1309_20261016_1300"
+    "slide_url": "/static/slides/ELE1309_DienTuSo.pdf"
   },
   {
     "key": "BAS1269_2026-10-16_1600",
@@ -1308,8 +1227,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1269_XacSuatThongKe.pdf",
-    "gcal_event_id": "gcal_evt_BAS1269_20261016_1600"
+    "slide_url": "/static/slides/BAS1269_XacSuatThongKe.pdf"
   },
   {
     "key": "BAS1158_2026-10-17_0700",
@@ -1324,8 +1242,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf",
-    "gcal_event_id": "gcal_evt_BAS1158_20261017_0700"
+    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf"
   },
   {
     "key": "INT1306_2026-10-17_1300",
@@ -1340,8 +1257,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf",
-    "gcal_event_id": "gcal_evt_INT1306_20261017_1300"
+    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf"
   },
   {
     "key": "INT1359_2026-10-22_0900",
@@ -1356,8 +1272,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/INT1359_ToanRoiRac2.pdf",
-    "gcal_event_id": "gcal_evt_INT1359_20261022_0900"
+    "slide_url": "/static/slides/INT1359_ToanRoiRac2.pdf"
   },
   {
     "key": "BAS1152_2026-10-22_1300",
@@ -1372,8 +1287,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1152_CNXHKH.pdf",
-    "gcal_event_id": "gcal_evt_BAS1152_20261022_1300"
+    "slide_url": "/static/slides/BAS1152_CNXHKH.pdf"
   },
   {
     "key": "BAS1152_2026-10-22_2212",
@@ -1388,8 +1302,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1152_CNXHKH.pdf",
-    "gcal_event_id": "gcal_evt_BAS1152_20261022_2212"
+    "slide_url": "/static/slides/BAS1152_CNXHKH.pdf"
   },
   {
     "key": "BAS1158_2026-10-23_0700",
@@ -1404,8 +1317,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf",
-    "gcal_event_id": "gcal_evt_BAS1158_20261023_0700"
+    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf"
   },
   {
     "key": "ELE1309_2026-10-23_1300",
@@ -1420,8 +1332,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/ELE1309_DienTuSo.pdf",
-    "gcal_event_id": "gcal_evt_ELE1309_20261023_1300"
+    "slide_url": "/static/slides/ELE1309_DienTuSo.pdf"
   },
   {
     "key": "BAS1269_2026-10-23_1600",
@@ -1436,8 +1347,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1269_XacSuatThongKe.pdf",
-    "gcal_event_id": "gcal_evt_BAS1269_20261023_1600"
+    "slide_url": "/static/slides/BAS1269_XacSuatThongKe.pdf"
   },
   {
     "key": "BAS1152_2026-10-23_2212",
@@ -1452,8 +1362,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1152_CNXHKH.pdf",
-    "gcal_event_id": "gcal_evt_BAS1152_20261023_2212"
+    "slide_url": "/static/slides/BAS1152_CNXHKH.pdf"
   },
   {
     "key": "BAS1158_2026-10-24_0700",
@@ -1468,8 +1377,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf",
-    "gcal_event_id": "gcal_evt_BAS1158_20261024_0700"
+    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf"
   },
   {
     "key": "INT1306_2026-10-24_1300",
@@ -1484,8 +1392,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf",
-    "gcal_event_id": "gcal_evt_INT1306_20261024_1300"
+    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf"
   },
   {
     "key": "INT1359_2026-10-29_0900",
@@ -1500,8 +1407,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/INT1359_ToanRoiRac2.pdf",
-    "gcal_event_id": "gcal_evt_INT1359_20261029_0900"
+    "slide_url": "/static/slides/INT1359_ToanRoiRac2.pdf"
   },
   {
     "key": "BAS1152_2026-10-29_1300",
@@ -1516,8 +1422,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1152_CNXHKH.pdf",
-    "gcal_event_id": "gcal_evt_BAS1152_20261029_1300"
+    "slide_url": "/static/slides/BAS1152_CNXHKH.pdf"
   },
   {
     "key": "BAS1152_2026-10-29_2212",
@@ -1532,8 +1437,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1152_CNXHKH.pdf",
-    "gcal_event_id": "gcal_evt_BAS1152_20261029_2212"
+    "slide_url": "/static/slides/BAS1152_CNXHKH.pdf"
   },
   {
     "key": "BAS1158_2026-10-30_0700",
@@ -1548,8 +1452,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf",
-    "gcal_event_id": "gcal_evt_BAS1158_20261030_0700"
+    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf"
   },
   {
     "key": "ELE1309_2026-10-30_1300",
@@ -1564,8 +1467,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/ELE1309_DienTuSo.pdf",
-    "gcal_event_id": "gcal_evt_ELE1309_20261030_1300"
+    "slide_url": "/static/slides/ELE1309_DienTuSo.pdf"
   },
   {
     "key": "BAS1269_2026-10-30_1600",
@@ -1580,8 +1482,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1269_XacSuatThongKe.pdf",
-    "gcal_event_id": "gcal_evt_BAS1269_20261030_1600"
+    "slide_url": "/static/slides/BAS1269_XacSuatThongKe.pdf"
   },
   {
     "key": "BAS1152_2026-10-30_2212",
@@ -1596,8 +1497,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1152_CNXHKH.pdf",
-    "gcal_event_id": "gcal_evt_BAS1152_20261030_2212"
+    "slide_url": "/static/slides/BAS1152_CNXHKH.pdf"
   },
   {
     "key": "BAS1158_2026-10-31_0700",
@@ -1612,8 +1512,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf",
-    "gcal_event_id": "gcal_evt_BAS1158_20261031_0700"
+    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf"
   },
   {
     "key": "INT1306_2026-10-31_1300",
@@ -1628,8 +1527,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf",
-    "gcal_event_id": "gcal_evt_INT1306_20261031_1300"
+    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf"
   },
   {
     "key": "INT1306_2026-11-01_0800",
@@ -1644,8 +1542,7 @@
     "online": true,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf",
-    "gcal_event_id": "gcal_evt_INT1306_20261101_0800"
+    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf"
   },
   {
     "key": "INT1359_2026-11-05_1000",
@@ -1660,8 +1557,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/INT1359_ToanRoiRac2.pdf",
-    "gcal_event_id": "gcal_evt_INT1359_20261105_1000"
+    "slide_url": "/static/slides/INT1359_ToanRoiRac2.pdf"
   },
   {
     "key": "BAS1152_2026-11-05_1300",
@@ -1676,8 +1572,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1152_CNXHKH.pdf",
-    "gcal_event_id": "gcal_evt_BAS1152_20261105_1300"
+    "slide_url": "/static/slides/BAS1152_CNXHKH.pdf"
   },
   {
     "key": "BAS1158_2026-11-06_0800",
@@ -1692,8 +1587,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf",
-    "gcal_event_id": "gcal_evt_BAS1158_20261106_0800"
+    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf"
   },
   {
     "key": "ELE1309_2026-11-06_1300",
@@ -1708,8 +1602,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/ELE1309_DienTuSo.pdf",
-    "gcal_event_id": "gcal_evt_ELE1309_20261106_1300"
+    "slide_url": "/static/slides/ELE1309_DienTuSo.pdf"
   },
   {
     "key": "BAS1269_2026-11-06_1600",
@@ -1724,8 +1617,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1269_XacSuatThongKe.pdf",
-    "gcal_event_id": "gcal_evt_BAS1269_20261106_1600"
+    "slide_url": "/static/slides/BAS1269_XacSuatThongKe.pdf"
   },
   {
     "key": "BAS1158_2026-11-07_0700",
@@ -1740,8 +1632,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf",
-    "gcal_event_id": "gcal_evt_BAS1158_20261107_0700"
+    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf"
   },
   {
     "key": "INT1306_2026-11-07_1300",
@@ -1756,8 +1647,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf",
-    "gcal_event_id": "gcal_evt_INT1306_20261107_1300"
+    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf"
   },
   {
     "key": "BSA12117_2026-11-08_1300",
@@ -1772,8 +1662,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf",
-    "gcal_event_id": "gcal_evt_BSA12117_20261108_1300"
+    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf"
   },
   {
     "key": "INT1359_2026-11-12_1000",
@@ -1788,8 +1677,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/INT1359_ToanRoiRac2.pdf",
-    "gcal_event_id": "gcal_evt_INT1359_20261112_1000"
+    "slide_url": "/static/slides/INT1359_ToanRoiRac2.pdf"
   },
   {
     "key": "BAS1152_2026-11-12_1300",
@@ -1804,8 +1692,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1152_CNXHKH.pdf",
-    "gcal_event_id": "gcal_evt_BAS1152_20261112_1300"
+    "slide_url": "/static/slides/BAS1152_CNXHKH.pdf"
   },
   {
     "key": "BAS1152_2026-11-12_2212",
@@ -1820,8 +1707,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1152_CNXHKH.pdf",
-    "gcal_event_id": "gcal_evt_BAS1152_20261112_2212"
+    "slide_url": "/static/slides/BAS1152_CNXHKH.pdf"
   },
   {
     "key": "BAS1158_2026-11-13_0800",
@@ -1836,8 +1722,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf",
-    "gcal_event_id": "gcal_evt_BAS1158_20261113_0800"
+    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf"
   },
   {
     "key": "ELE1309_2026-11-13_1300",
@@ -1852,8 +1737,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/ELE1309_DienTuSo.pdf",
-    "gcal_event_id": "gcal_evt_ELE1309_20261113_1300"
+    "slide_url": "/static/slides/ELE1309_DienTuSo.pdf"
   },
   {
     "key": "BAS1269_2026-11-13_1600",
@@ -1868,8 +1752,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1269_XacSuatThongKe.pdf",
-    "gcal_event_id": "gcal_evt_BAS1269_20261113_1600"
+    "slide_url": "/static/slides/BAS1269_XacSuatThongKe.pdf"
   },
   {
     "key": "BAS1152_2026-11-13_2212",
@@ -1884,8 +1767,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1152_CNXHKH.pdf",
-    "gcal_event_id": "gcal_evt_BAS1152_20261113_2212"
+    "slide_url": "/static/slides/BAS1152_CNXHKH.pdf"
   },
   {
     "key": "BAS1158_2026-11-14_0800",
@@ -1900,8 +1782,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf",
-    "gcal_event_id": "gcal_evt_BAS1158_20261114_0800"
+    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf"
   },
   {
     "key": "INT1306_2026-11-14_1300",
@@ -1916,8 +1797,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf",
-    "gcal_event_id": "gcal_evt_INT1306_20261114_1300"
+    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf"
   },
   {
     "key": "INT1359_2026-11-19_1000",
@@ -1932,8 +1812,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/INT1359_ToanRoiRac2.pdf",
-    "gcal_event_id": "gcal_evt_INT1359_20261119_1000"
+    "slide_url": "/static/slides/INT1359_ToanRoiRac2.pdf"
   },
   {
     "key": "BAS1152_2026-11-19_1400",
@@ -1948,8 +1827,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1152_CNXHKH.pdf",
-    "gcal_event_id": "gcal_evt_BAS1152_20261119_1400"
+    "slide_url": "/static/slides/BAS1152_CNXHKH.pdf"
   },
   {
     "key": "BAS1152_2026-11-19_2212",
@@ -1964,8 +1842,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1152_CNXHKH.pdf",
-    "gcal_event_id": "gcal_evt_BAS1152_20261119_2212"
+    "slide_url": "/static/slides/BAS1152_CNXHKH.pdf"
   },
   {
     "key": "BAS1158_2026-11-20_0800",
@@ -1980,8 +1857,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf",
-    "gcal_event_id": "gcal_evt_BAS1158_20261120_0800"
+    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf"
   },
   {
     "key": "BAS1269_2026-11-20_1600",
@@ -1996,8 +1872,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1269_XacSuatThongKe.pdf",
-    "gcal_event_id": "gcal_evt_BAS1269_20261120_1600"
+    "slide_url": "/static/slides/BAS1269_XacSuatThongKe.pdf"
   },
   {
     "key": "BAS1152_2026-11-20_2212",
@@ -2012,8 +1887,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1152_CNXHKH.pdf",
-    "gcal_event_id": "gcal_evt_BAS1152_20261120_2212"
+    "slide_url": "/static/slides/BAS1152_CNXHKH.pdf"
   },
   {
     "key": "BAS1158_2026-11-21_0800",
@@ -2028,8 +1902,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf",
-    "gcal_event_id": "gcal_evt_BAS1158_20261121_0800"
+    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf"
   },
   {
     "key": "INT1306_2026-11-21_1300",
@@ -2044,8 +1917,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf",
-    "gcal_event_id": "gcal_evt_INT1306_20261121_1300"
+    "slide_url": "/static/slides/INT1306_Chuong3_CayNhiPhan.pdf"
   },
   {
     "key": "INT1359_2026-11-26_1000",
@@ -2060,8 +1932,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/INT1359_ToanRoiRac2.pdf",
-    "gcal_event_id": "gcal_evt_INT1359_20261126_1000"
+    "slide_url": "/static/slides/INT1359_ToanRoiRac2.pdf"
   },
   {
     "key": "BAS1158_2026-11-27_0800",
@@ -2076,8 +1947,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf",
-    "gcal_event_id": "gcal_evt_BAS1158_20261127_0800"
+    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf"
   },
   {
     "key": "BAS1158_2026-11-28_0800",
@@ -2092,8 +1962,7 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf",
-    "gcal_event_id": "gcal_evt_BAS1158_20261128_0800"
+    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf"
   },
   {
     "key": "BAS1158_2026-12-05_0800",
@@ -2108,7 +1977,6 @@
     "online": false,
     "cancelled": false,
     "makeup": false,
-    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf",
-    "gcal_event_id": "gcal_evt_BAS1158_20261205_0800"
+    "slide_url": "/static/slides/BAS1158_TiengAnhCourse2.pdf"
   }
 ]
